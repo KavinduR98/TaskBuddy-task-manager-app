@@ -83,6 +83,7 @@ public class EmployeeService {
         }
 
         String oldName = existingEmployee.getName();
+        modelMapper.map(requestDTO, existingEmployee);
         Employee updatedEmployee = employeeRepository.save(existingEmployee);
 
         log.info("Employee updated successfully - ID: {}, Old name: {}, New name: {}", id, oldName, updatedEmployee.getName());
