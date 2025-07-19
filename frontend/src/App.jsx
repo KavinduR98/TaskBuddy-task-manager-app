@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import { Routes, Route, Navigate  } from 'react-router-dom';
 import { AuthProvider, useAuth  } from './context/AuthContext';
 
-import Login from './components/auth/Login';
 import Layout from './components/common/Layout';
+import EmployeeDashboard from './components/employee/EmployeeDashboard';
+import HomeRedirect from './components/HomeRedirect';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -35,26 +35,41 @@ function App() {
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <Routes>
-          {/* Public Routes */}
-            <Route path="/" element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
+          {/* Root redirect */}
+          <Route path="/" element={<HomeRedirect />} />
+
+          {/* 2. Protected Dashboard Routes */}
+          <Route
+            path="/dashboard/*"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+
+            {/* These are nested under Layout's <Outlet /> */}
+            <Route path="employees" element={<EmployeeDashboard />} />
+          </Route>
+
+          {/* Catch-all for 404 Not Found pages */}
+          <Route 
+              path="*" 
+              element={
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
+                    <p className="text-gray-600 mb-4">Page not found</p>
+                    <button 
+                      onClick={() => window.location.href = '/'}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    >
+                      Go Home
+                    </button>
+                  </div>
+                </div>
               } 
             />
-
-          {/* Protected Routes */}
-          <Route 
-              path="/dashboard/*" 
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    
-                  </Layout>
-                </ProtectedRoute>
-              } 
-          />
-
         </Routes>
       </div>
     </AuthProvider>
