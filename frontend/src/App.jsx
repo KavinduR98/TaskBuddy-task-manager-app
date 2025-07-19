@@ -3,6 +3,7 @@ import { Routes, Route, Navigate  } from 'react-router-dom';
 import { AuthProvider, useAuth  } from './context/AuthContext';
 
 import Login from './components/auth/Login';
+import Layout from './components/common/Layout';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -41,6 +42,19 @@ function App() {
                 </PublicRoute>
               } 
             />
+
+          {/* Protected Routes */}
+          <Route 
+              path="/dashboard/*" 
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    
+                  </Layout>
+                </ProtectedRoute>
+              } 
+          />
+
         </Routes>
       </div>
     </AuthProvider>
