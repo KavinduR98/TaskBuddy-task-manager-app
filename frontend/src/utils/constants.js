@@ -4,3 +4,9 @@ export const STATUS_COLORS = {
     INACTIVE: 'bg-yellow-100 text-yellow-800',
     TERMINATED: 'bg-red-100 text-red-800',
 }
+
+export const EMPLOYEE_STATUS = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  TERMINATED: 'TERMINATED'
+};

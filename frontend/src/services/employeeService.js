@@ -34,6 +34,16 @@ const employeeService = {
         } catch (error) {
             throw error.response?.data || { message: 'Failed to delete employee' };
         }
+    },
+
+    createEmployee: async (employeeData) => {
+        try {
+            const response = await api.post('/employees', employeeData);
+            console.log(response);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to create employee' };
+        }
     }
 }
 

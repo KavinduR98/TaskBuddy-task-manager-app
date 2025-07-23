@@ -1,12 +1,45 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Save  } from 'lucide-react'
+import { EMPLOYEE_STATUS } from '../../utils/constants'
+import employeeService from '../../services/employeeService'
 
 const EmployeeCreate = () => {
 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        department: '',
+        position: '',
+        phoneNumber: '',
+        status: EMPLOYEE_STATUS.ACTIVE
+    });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            await employeeService.createEmployee(formData);
+
+            navigate('/dashboard/employees');
+        } catch (error) {
+            setError(error.message || 'Failed to create employee');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
   return (
     <div className='space-y-6'>
@@ -22,7 +55,7 @@ const EmployeeCreate = () => {
         </div>
         {/* Form */}
         <div className='bg-white rounded-lg shadow max-w-2xl'>
-            <form className='p-6 space-y-6'>
+            <form className='p-6 space-y-6' onSubmit={handleSubmit}>
                 {error && (
                     <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md'>
                         {error}
@@ -38,6 +71,8 @@ const EmployeeCreate = () => {
                             type="text" 
                             id='name'
                             name='name'
+                            value={formData.name}
+                            onChange={handleChange}
                             required
                             placeholder='Enter full name'
                             className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500' 
@@ -51,6 +86,8 @@ const EmployeeCreate = () => {
                             type="email"
                             id="email"
                             name="email"
+                            value={formData.email}
+                            onChange={handleChange}
                             required
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter email address"
@@ -64,6 +101,8 @@ const EmployeeCreate = () => {
                             type="text"
                             id="department"
                             name="department"
+                            value={formData.department}
+                            onChange={handleChange}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter department"
                         />
@@ -77,6 +116,8 @@ const EmployeeCreate = () => {
                             type="text"
                             id="position"
                             name="position"
+                            value={formData.position}
+                            onChange={handleChange}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter position"
                         />
@@ -90,6 +131,8 @@ const EmployeeCreate = () => {
                             type="tel"
                             id="phoneNumber"
                             name="phoneNumber"
+                            value={formData.phoneNumber}
+                            onChange={handleChange}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter phone number"
                         />
@@ -102,10 +145,16 @@ const EmployeeCreate = () => {
                         <select
                             id="status"
                             name="status"
+                            value={formData.status}
+                            onChange={handleChange}
                             required
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
-                            <option value=""></option>
+                            {Object.values(EMPLOYEE_STATUS).map((status) => (
+                                <option key={status} value={status}>
+                                    {status}
+                                </option>
+                            ))}
                         </select>
                      </div>
                 </div>
