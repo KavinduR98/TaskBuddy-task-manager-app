@@ -25,7 +25,16 @@ const employeeService = {
         });
 
         return stats;
-    } 
+    },
+
+    deleteEmployee: async (id) => {
+        try {
+            await api.delete(`/employees/${id}`);
+            return { message: 'Employee deleted successfully' };
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to delete employee' };
+        }
+    }
 }
 
 export default employeeService;

@@ -18,7 +18,7 @@ const TopNavbar = () => {
     <nav className='bg-white shadow-sm border-b border-gray-200 px-4 py-2'>
         <div className='flex justify-between items-center'>
             <div className='flex items-center'>
-                <h1 className='text-xl font-semibold text-gray-800'>Dashboard</h1>
+                <h1 className='text-xl font-semibold text-gray-800'></h1>
             </div>
 
             <div className="relative">

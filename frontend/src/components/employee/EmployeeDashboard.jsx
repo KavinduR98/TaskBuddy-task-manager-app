@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo  } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, UserCheck, UserX, UserMinus, Plus } from 'lucide-react';
+import { UserCheck, UserX, UserMinus, Edit, Trash2, X } from 'lucide-react';
+import DataTable from 'react-data-table-component';
 import employeeService from '../../services/employeeService';
 import LoadingSpinner from '../common/LoadingSpinner'
+import { STATUS_COLORS } from '../../utils/constants';
 
 const EmployeeDashboard = () => {
 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [employees, setEmployees] = useState([]);
+    const [nameFilter, setNameFilter] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,6 +29,22 @@ const EmployeeDashboard = () => {
             setLoading(false);
         }
     };
+
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this employee?')) {
+            try {
+                await employeeService.deleteEmployee(id);
+                fetchEmployees(); // Refresh the list
+            } catch (error) {
+                setError(error.message || 'Failed to delete employee');
+            }
+        }
+    };
+
+    // Filtered employee list based on name
+    const filteredEmployees = employees.filter((emp) =>
+        emp.name?.toLowerCase().includes(nameFilter.toLowerCase())
+    );
 
     const stats = employeeService.getEmployeeStats(employees)
 
@@ -52,6 +71,129 @@ const EmployeeDashboard = () => {
             iconColor: 'text-red-600'
         }
     ];
+
+    // DataTable columns configuration
+    const columns = [
+        {
+            name: 'Name',
+            selector: row => row.name,
+            sortable: true,
+            grow: 2,
+            cell: row => <span className="font-semibold">{row.name}</span>,
+        },
+        {
+            name: 'Department',
+            selector: row => row.department || 'N/A',
+            sortable: true,
+        },
+        {
+            name: 'Position',
+            selector: row => row.position || 'N/A',
+            sortable: true,
+        },
+        {
+            name: 'Phone',
+            selector: row => row.phoneNumber || 'N/A',
+            sortable: true,
+        },
+        {
+            name: 'Status',
+            cell: row => (
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[row.status]}`}>
+                    {row.status}
+                </span>
+            ),
+            sortable: true,
+        },
+        {
+            name: 'Actions',
+            cell: row => (
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => navigate(`/dashboard/employees/edit/${row.id}`)}
+                        className="text-indigo-600 hover:text-indigo-900 p-1 hover:bg-indigo-50 rounded"
+                    >
+                        <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                        onClick={() => handleDelete(row.id)}
+                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                </div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        },
+    ];
+
+    // Custom styles for DataTable
+    const customStyles = {
+        header: {
+            style: {
+                minHeight: '56px',
+                paddingLeft: '24px',
+                paddingRight: '24px',
+            },
+        },
+        headRow: {
+            style: {
+                backgroundColor: '#f9fafb',
+                borderTopStyle: 'solid',
+                borderTopWidth: '1px',
+                borderTopColor: '#e5e7eb',
+            },
+        },
+        headCells: {
+            style: {
+                paddingLeft: '24px',
+                paddingRight: '24px',
+                fontSize: '12px',
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#6b7280',
+            },
+        },
+        cells: {
+            style: {
+                paddingLeft: '24px',
+                paddingRight: '24px',
+                paddingTop: '16px',
+                paddingBottom: '16px',
+            },
+        },
+    };
+
+    // Custom name search bar shown above header row
+    const SubHeaderComponent = useMemo(() => {
+        return (
+            <div className="w-full flex justify-end items-center gap-1 px-4 mt-2 mb-2">
+                <input
+                    type="text"
+                    placeholder="Search by name..."
+                    className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={nameFilter}
+                    onChange={(e) => setNameFilter(e.target.value)}
+                />
+                <button
+                    onClick={() => setNameFilter('')}
+                    className={`flex items-center gap-1 px-3 py-2 rounded-md text-sm transition-colors ${
+                        nameFilter
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    }`}
+                    disabled={!nameFilter}
+                >
+                    <X className="h-4 w-4" />
+                    Clear
+                </button>
+            </div>
+        );
+    }, [nameFilter]);
+
 
     if (loading) {
         return <LoadingSpinner size="lg" text="Loading employees..." />;
@@ -97,12 +239,27 @@ const EmployeeDashboard = () => {
             })}
         </div>
         
-        {/* Employee Table */}
-        <div className='bg-white rounded-lg shadow'>
-            <div className='px-6 py-4 border-b border-gray-200'>
-                <h2 className='text-lg font-medium text-gray-900'>All Employees</h2>
-            </div>
-            {/* Table component */}
+        {/* Employee DataTable */}
+        <div className='bg-white rounded-lg shadow overflow-hidden'>
+            <DataTable
+                title="All Employees"
+                columns={columns}
+                data={filteredEmployees}
+                pagination
+                paginationPerPage={10}
+                paginationRowsPerPageOptions={[10, 20, 30, 50]}
+                highlightOnHover
+                striped
+                responsive
+                customStyles={customStyles}
+                subHeader
+                subHeaderComponent={SubHeaderComponent}
+                noDataComponent={
+                    <div className="p-6 text-center text-gray-500">
+                        No employees found...
+                    </div>
+                }
+            />
         </div>
     </div>
   )
