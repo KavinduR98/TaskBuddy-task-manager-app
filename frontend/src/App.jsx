@@ -4,6 +4,7 @@ import { AuthProvider, useAuth  } from './context/AuthContext';
 import Layout from './components/common/Layout';
 import EmployeeDashboard from './components/employee/EmployeeDashboard';
 import HomeRedirect from './components/HomeRedirect';
+import EmployeeCreate from './components/employee/EmployeeCreate';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -50,6 +51,7 @@ function App() {
 
             {/* These are nested under Layout's <Outlet /> */}
             <Route path="employees" element={<EmployeeDashboard />} />
+            <Route path="employees/create" element={<EmployeeCreate />} />
           </Route>
 
           {/* Catch-all for 404 Not Found pages */}
