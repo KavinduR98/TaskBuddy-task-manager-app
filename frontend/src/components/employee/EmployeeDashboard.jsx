@@ -2,6 +2,8 @@ import React, { useEffect, useState, useMemo  } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserCheck, UserX, UserMinus, Edit, Trash2, X } from 'lucide-react';
 import DataTable from 'react-data-table-component';
+import jsPDF from 'jspdf';
+import { applyPlugin } from 'jspdf-autotable';
 import employeeService from '../../services/employeeService';
 import LoadingSpinner from '../common/LoadingSpinner'
 import { STATUS_COLORS } from '../../utils/constants';
@@ -45,6 +47,35 @@ const EmployeeDashboard = () => {
     const filteredEmployees = employees.filter((emp) =>
         emp.name?.toLowerCase().includes(nameFilter.toLowerCase())
     );
+
+    const exportToPDF = () => {
+        applyPlugin(jsPDF);
+        const doc = new jsPDF();
+
+        const tableColumn = ["Name", "Department", "Position", "Phone", "Status"];
+        const tableRows = [];
+
+        employees.forEach(emp => {
+            tableRows.push([
+                emp.name,
+                emp.department || 'N/A',
+                emp.position || 'N/A',
+                emp.phoneNumber || 'N/A',
+                emp.status,
+            ]);
+        });
+
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [59, 130, 246] }, // Tailwind's blue-600
+        });
+
+        doc.text("Employee Report", 14, 15);
+        doc.save("employee_report.pdf");
+    };
 
     const stats = employeeService.getEmployeeStats(employees)
 
@@ -124,7 +155,7 @@ const EmployeeDashboard = () => {
                 </div>
             ),
             ignoreRowClick: true,
-            allowOverflow: true,
+            allowOverflow : true,
             button: true,
         },
     ];
@@ -165,34 +196,52 @@ const EmployeeDashboard = () => {
                 paddingBottom: '16px',
             },
         },
+        title: {
+            style: {
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#1a202c',
+            },
+        },
     };
 
-    // Custom name search bar shown above header row
     const SubHeaderComponent = useMemo(() => {
         return (
-            <div className="w-full flex justify-end items-center gap-1 px-4 mt-2 mb-2">
-                <input
-                    type="text"
-                    placeholder="Search by name..."
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={nameFilter}
-                    onChange={(e) => setNameFilter(e.target.value)}
-                />
-                <button
-                    onClick={() => setNameFilter('')}
-                    className={`flex items-center gap-1 px-3 py-2 rounded-md text-sm transition-colors ${
-                        nameFilter
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    }`}
-                    disabled={!nameFilter}
-                >
-                    <X className="h-4 w-4" />
-                    Clear
-                </button>
+            <div className="w-full flex flex-col sm:flex-row sm:justify-end sm:items-center gap-2 px-4 mt-2 mb-2">
+                {/* Export Button */}
+                <div className="flex justify-end">
+                    <button
+                        onClick={exportToPDF}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm transition-colors"
+                    >
+                        Export as PDF
+                    </button>
+                </div>
+                {/* Search Box + Clear Button */}
+                <div className="flex">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        className="border border-gray-300  px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={nameFilter}
+                        onChange={(e) => setNameFilter(e.target.value)}
+                    />
+                    <button
+                        onClick={() => setNameFilter('')}
+                        className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors ${
+                            nameFilter
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        }`}
+                        disabled={!nameFilter}
+                    >
+                        <X className="h-4 w-4" />
+                        Clear
+                    </button>
+                </div>
             </div>
         );
-    }, [nameFilter]);
+    }, [nameFilter, employees]);
 
 
     if (loading) {
@@ -206,7 +255,7 @@ const EmployeeDashboard = () => {
             <h1 className='text-2xl font-bold text-gray-900'>Employee Management</h1>
             <button
                 onClick={() => navigate('/dashboard/employees/create')}
-                className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center transition-colors'
+                className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 flex items-center transition-colors'
             >
                 Add New Employee
             </button>
