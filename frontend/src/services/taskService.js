@@ -13,6 +13,15 @@ const taskService = {
         }
     },
 
+    deleteTask: async (id) => {
+        try {
+            await api.delete(`/tasks/${id}`);
+            return { message: 'Task deleted successfully' };
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to delete task' };
+        }
+    },
+
     getTaskStats: (tasks) => {
         const stats = {
             PENDING: 0,

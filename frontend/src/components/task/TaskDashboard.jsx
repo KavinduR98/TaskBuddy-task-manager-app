@@ -6,6 +6,20 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import DataTable from 'react-data-table-component';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../../utils/constants';
 
+const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
+};
+
+const formatStatus = (status) => {
+    if (!status) return 'N/A';
+    return status.replace('_', ' ').charAt(0).toUpperCase() + status.replace('_', ' ').slice(1).toLowerCase();
+};
+
+const formatPriority = (priority) => {
+    if (!priority) return 'N/A';
+    return priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
+};
+
 const TaskDashboard = () => {
 
     const [tasks, setTasks] = useState([]);
@@ -29,64 +43,71 @@ const TaskDashboard = () => {
         }
     }
 
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this task?')) {
+            try {
+                await taskService.deleteTask(id);
+                fetchTasks(); // Refresh the list
+            } catch (error) {
+                setError(error.message || 'Failed to delete task');
+            }
+        }
+    };
+
     const stats = taskService.getTaskStats(tasks);
 
     const cardData = [
         {
-        title: 'Pending Tasks',
-        value: stats.PENDING,
-        icon: Clock,
-        color: 'bg-blue-100 text-blue-800',
-        iconColor: 'text-blue-600'
+            title: 'Pending Tasks',
+            value: stats.PENDING,
+            icon: Clock,
+            color: 'bg-blue-100 text-blue-800',
+            iconColor: 'text-blue-600'
         },
         {
-        title: 'In Progress',
-        value: stats.IN_PROGRESS,
-        icon: CheckSquare,
-        color: 'bg-purple-100 text-purple-800',
-        iconColor: 'text-purple-600'
+            title: 'In Progress',
+            value: stats.IN_PROGRESS,
+            icon: CheckSquare,
+            color: 'bg-purple-100 text-purple-800',
+            iconColor: 'text-purple-600'
         },
         {
-        title: 'Completed',
-        value: stats.COMPLETED,
-        icon: CheckCircle,
-        color: 'bg-green-100 text-green-800',
-        iconColor: 'text-green-600'
+            title: 'Completed',
+            value: stats.COMPLETED,
+            icon: CheckCircle,
+            color: 'bg-green-100 text-green-800',
+            iconColor: 'text-green-600'
         },
         {
-        title: 'Cancelled',
-        value: stats.CANCELLED,
-        icon: XCircle,
-        color: 'bg-red-100 text-red-800',
-        iconColor: 'text-red-600'
+            title: 'Cancelled',
+            value: stats.CANCELLED,
+            icon: XCircle,
+            color: 'bg-red-100 text-red-800',
+            iconColor: 'text-red-600'
         }
     ];
 
     // DataTable columns configuration
     const columns = [
         {
-            name: '#No',
-            selector: row => row.id,
-            sortable: true,
-            grow: 1/4,
-        },
-        {
             name: 'Title',
             selector: row => row.title,
             sortable: true,
-            grow: 3,
-            cell: row => <span className="font-semibold text-nowrap">{row.title}</span>,
-        },
-        {
-            name: 'Due Date',
-            selector: row => row.dueDate || 'N/A',
-            sortable: true,
+            grow: 2,
+            cell: row => (
+                <div>
+                    <div className="text-sm font-semibold text-gray-900">{row.title}</div>
+                    <div className="text-sm text-gray-500 max-w-xs truncate">
+                        {row.description || 'No description'}
+                    </div>
+                </div>
+            ),
         },
         {
             name: 'Status',
             cell: row => (
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[row.status]}`}>
-                    {row.status}
+                    {formatStatus(row.status)}
                 </span>
             ),
             sortable: true,
@@ -95,10 +116,40 @@ const TaskDashboard = () => {
             name: 'Priority',
             cell: row => (
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${PRIORITY_COLORS[row.priority]}`}>
-                    {row.priority}
+                    {formatPriority(row.priority)}
                 </span>
             ),
             sortable: true,
+        },
+        {
+            name: 'Due Date',
+            selector: row => row.dueDate,
+            sortable: true,
+            cell: row => <span>{row.dueDate ? formatDate(row.dueDate) : 'N/A'}</span>,
+        },
+        {
+            name: 'Assigned To',
+            cell: row => (
+                row.assignedEmployees && row.assignedEmployees.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                        {row.assignedEmployees.slice(0, 2).map((employee) => (
+                            <span key={employee.id} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                                {employee.name}
+                            </span>
+                        ))}
+                        {row.assignedEmployees.length > 2 && (
+                            <span className="text-xs text-gray-500">
+                                +{row.assignedEmployees.length - 2} more
+                            </span>
+                        )}
+                    </div>
+                ) : (
+                    <span className="text-xs font-semibold text-yellow-800 bg-yellow-100 px-2 py-1 rounded-full">
+                        Unassigned
+                    </span>
+                )
+            ),
+            ignoreRowClick: true,
         },
         {
             name: 'Actions',
