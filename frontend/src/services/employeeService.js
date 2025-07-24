@@ -39,10 +39,27 @@ const employeeService = {
     createEmployee: async (employeeData) => {
         try {
             const response = await api.post('/employees', employeeData);
-            console.log(response);
             return response.data;
         } catch (error) {
             throw error.response?.data || { message: 'Failed to create employee' };
+        }
+    },
+
+    getEmployeeById: async (id) => {
+        try {
+            const response = await api.get(`/employees/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to fetch employee' };
+        }
+    },
+
+    updateEmployee: async (id, employeeData) => {
+        try {
+            const response = await api.put(`/employees/${id}`, employeeData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to update employee' };
         }
     }
 }

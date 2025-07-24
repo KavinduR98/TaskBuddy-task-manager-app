@@ -5,6 +5,7 @@ import Layout from './components/common/Layout';
 import EmployeeDashboard from './components/employee/EmployeeDashboard';
 import HomeRedirect from './components/HomeRedirect';
 import EmployeeCreate from './components/employee/EmployeeCreate';
+import EmployeeUpdate from './components/employee/EmployeeUpdate';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -52,6 +53,7 @@ function App() {
             {/* These are nested under Layout's <Outlet /> */}
             <Route path="employees" element={<EmployeeDashboard />} />
             <Route path="employees/create" element={<EmployeeCreate />} />
+            <Route path="employees/edit/:id" element={<EmployeeUpdate />} />
           </Route>
 
           {/* Catch-all for 404 Not Found pages */}
