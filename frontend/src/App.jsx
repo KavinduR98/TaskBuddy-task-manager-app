@@ -6,6 +6,7 @@ import EmployeeDashboard from './components/employee/EmployeeDashboard';
 import HomeRedirect from './components/HomeRedirect';
 import EmployeeCreate from './components/employee/EmployeeCreate';
 import EmployeeUpdate from './components/employee/EmployeeUpdate';
+import TaskDashboard from './components/task/TaskDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -54,6 +55,7 @@ function App() {
             <Route path="employees" element={<EmployeeDashboard />} />
             <Route path="employees/create" element={<EmployeeCreate />} />
             <Route path="employees/edit/:id" element={<EmployeeUpdate />} />
+            <Route path="tasks" element={<TaskDashboard />} />
           </Route>
 
           {/* Catch-all for 404 Not Found pages */}
