@@ -22,6 +22,15 @@ const taskService = {
         }
     },
 
+    createTask: async (taskData) => {
+        try {
+            const response = await api.post('/tasks', taskData);
+            return response.data;
+        } catch (error) {   
+             throw error.response?.data || { message: 'Failed to create task' };
+        }
+    },
+
     getTaskStats: (tasks) => {
         const stats = {
             PENDING: 0,

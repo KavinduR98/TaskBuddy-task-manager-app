@@ -35,10 +35,11 @@ const EmployeeCreate = () => {
     };
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        const { name, value } = e.target;  // Destructuring 'name' and 'value' from e.target
+        setFormData(prev => ({  // <--- Using a functional update with 'prev'
+            ...prev,
+            [name]: value
+        }));
     };
 
   return (

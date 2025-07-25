@@ -7,6 +7,8 @@ import HomeRedirect from './components/HomeRedirect';
 import EmployeeCreate from './components/employee/EmployeeCreate';
 import EmployeeUpdate from './components/employee/EmployeeUpdate';
 import TaskDashboard from './components/task/TaskDashboard';
+import TaskCreate from './components/task/TaskCreate';
+import TaskUpdate from './components/task/TaskUpdate';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -55,7 +57,10 @@ function App() {
             <Route path="employees" element={<EmployeeDashboard />} />
             <Route path="employees/create" element={<EmployeeCreate />} />
             <Route path="employees/edit/:id" element={<EmployeeUpdate />} />
+
             <Route path="tasks" element={<TaskDashboard />} />
+            <Route path="tasks/create" element={<TaskCreate />} />
+            <Route path="tasks/edit/:id" element={<TaskUpdate />} />
           </Route>
 
           {/* Catch-all for 404 Not Found pages */}
