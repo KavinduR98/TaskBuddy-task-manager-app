@@ -5,8 +5,7 @@ const taskService = {
     getAllTasks: async () => {
         try {
             const response = await api.get('/tasks');
-            console.log(response.data);
-            
+            // console.log(response.data);
             return response.data;
         } catch (error) {
             throw error.response?.data || { message: 'Failed to fetch tasks' };
@@ -27,7 +26,7 @@ const taskService = {
             const response = await api.post('/tasks', taskData);
             return response.data;
         } catch (error) {   
-             throw error.response?.data || { message: 'Failed to create task' };
+            throw error.response?.data || { message: 'Failed to create task' };
         }
     },
 
@@ -48,6 +47,24 @@ const taskService = {
 
         return stats;
     },
+
+    getTaskById: async (id) => {
+        try {
+            const response = await api.get(`/tasks/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to fetch task' };
+        }
+    }, 
+
+    updateTask: async (id, taskData) => {
+        try {
+            const response = await api.put(`/tasks/${id}`, taskData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to update task' };
+        }
+    }
 }
 
 export default taskService;
