@@ -9,29 +9,78 @@ import EmployeeUpdate from './components/employee/EmployeeUpdate';
 import TaskDashboard from './components/task/TaskDashboard';
 import TaskCreate from './components/task/TaskCreate';
 import TaskUpdate from './components/task/TaskUpdate';
+import AdminDashboard from './components/admin/AdminDashboard'
 
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+// Protected Route for authenticated ADMIN users only
+const AdminProtectedRoute = ({ children }) => {
+  const { isAuthenticated, user, loading } = useAuth();
+  
   if (loading) {
-    return 
+    return (
       <div className="flex justify-center items-center h-screen text-xl text-gray-700">
         Loading authentication...
-      </div>;
+      </div>
+    );
   }
-  return isAuthenticated ? children : <Navigate to="/" replace />;
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  if (user?.role !== 'ADMIN') {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-red-600 mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-4">Admin access required</p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return children;
 };
 
-// Public Route Component (redirect to dashboard if already logged in)
-const PublicRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+// Protected Route for authenticated EMPLOYEE users only
+const EmployeeProtectedRoute = ({ children }) => {
+  const { isAuthenticated, user, loading } = useAuth();
+  
   if (loading) {
-    return 
+    return (
       <div className="flex justify-center items-center h-screen text-xl text-gray-700">
-        Loading...
-      </div>;
+        Loading authentication...
+      </div>
+    );
   }
-  return !isAuthenticated ? children : <Navigate to="/dashboard/employees" replace />;
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  if (user?.role !== 'EMPLOYEE') {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-red-600 mb-4">Access Denied</h1>
+          <p className="text-gray-600 mb-4">Employee access required</p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return children;
 };
 
 function App() {
@@ -40,28 +89,34 @@ function App() {
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <Routes>
-          {/* Root redirect */}
+          {/* Home redirect based on authentication and role */}
           <Route path="/" element={<HomeRedirect />} />
 
-          {/* 2. Protected Dashboard Routes */}
+          {/* Admin Routes */}
           <Route
-            path="/dashboard/*"
+            path="/admin/*"
             element={
-              <ProtectedRoute>
+              <AdminProtectedRoute>
                 <Layout />
-              </ProtectedRoute>
+              </AdminProtectedRoute>
             }
           >
+            {/* Admin Dashboard */}
+            <Route path="dashboard" element={<AdminDashboard />} />
+            
+            {/* Employee Management Routes */}
+            <Route path="employees" element={<EmployeeDashboard />} />
+            <Route path="employees/create" element={<EmployeeCreate />} />
+            <Route path="employees/edit/:id" element={<EmployeeUpdate />} />
 
-            {/* These are nested under Layout's <Outlet /> */}
-            <Route path="employees" element={<EmployeeDashboard />} />
-            <Route path="employees/create" element={<EmployeeCreate />} />
-            <Route path="employees/edit/:id" element={<EmployeeUpdate />} />
-
-            <Route path="tasks" element={<TaskDashboard />} />
-            <Route path="tasks/create" element={<TaskCreate />} />
-            <Route path="tasks/edit/:id" element={<TaskUpdate />} />
+            {/* Task Management Routes */}
+            <Route path="tasks" element={<TaskDashboard />} />
+            <Route path="tasks/create" element={<TaskCreate />} />
+            <Route path="tasks/edit/:id" element={<TaskUpdate />} />
           </Route>
+
+          {/* Employee Routes */}
+          {/* Coming soon... */}
 
           {/* Catch-all for 404 Not Found pages */}
           <Route 
