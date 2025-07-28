@@ -93,10 +93,12 @@ const Sidebar = () => {
         <nav className='space-y-1'>
             {navItems.map((item) => {
                 const Icon = item.icon;
+                const isManageTasks = item.path === '/admin/tasks';
                 return(
                     <NavLink 
                         key={item.path}
                         to={item.path}
+                        end={isManageTasks} 
                         className={({ isActive }) => 
                             `flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                                 isActive 
