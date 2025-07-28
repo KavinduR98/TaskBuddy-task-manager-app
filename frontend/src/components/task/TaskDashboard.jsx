@@ -156,7 +156,7 @@ const TaskDashboard = () => {
             cell: row => (
                 <div className="flex space-x-2">
                     <button
-                        onClick={() => navigate(`/dashboard/tasks/edit/${row.id}`)}
+                        onClick={() => navigate(`/admin/tasks/edit/${row.id}`)}
                         className="text-indigo-600 hover:text-indigo-900 p-1 hover:bg-indigo-50 rounded"
                     >
                         <Edit className="h-4 w-4" />
