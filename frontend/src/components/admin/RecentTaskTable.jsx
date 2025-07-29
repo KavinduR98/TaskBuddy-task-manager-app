@@ -33,7 +33,7 @@ const RecentTaskTable = ({ tasks }) => {
 
     return (
       <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
+        className={`px-2 py-1 rounded-md text-xs font-medium ${
           priorityColors[priority] || "bg-gray-100 text-gray-800"
         }`}
       >
