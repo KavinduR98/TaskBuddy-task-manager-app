@@ -8,6 +8,32 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import RecentTaskTable from "./RecentTaskTable";
 import CardSection from "./CardSection";
 import StatCard from "./StatCard";
+import {
+    Chart as ChartJS,
+    ArcElement,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
+import { Pie, Bar } from 'react-chartjs-2';
+
+// Import utility functions and chart options
+import {getTaskDistributionData, getTaskPriorityData} from '../../utils/chartDataUtils';
+import {pieChartOptions, barChartOptions} from '../../utils/chartOptions';
+
+// Register Chart.js components
+ChartJS.register(
+    ArcElement,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 const AdminDashboard = () => {
     const [tasks, setTasks] = useState([]);
@@ -101,8 +127,16 @@ const AdminDashboard = () => {
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 mb-2">
-                <CardSection title="Task Distribution" />
-                <CardSection title="Task Priority Levels" />
+                <CardSection title="Task Distribution">
+                    <div style={{ height: '300px', padding: '10px' }}>
+                        <Pie data={getTaskDistributionData(taskStats)} options={pieChartOptions} />
+                    </div>
+                </CardSection>
+                <CardSection title="Task Priority Levels">
+                    <div style={{ height: '300px', padding: '10px' }}>
+                        <Bar data={getTaskPriorityData(tasks)} options={barChartOptions}/>
+                    </div>
+                </CardSection>
             </div>
 
             {/* Recent tasks */}

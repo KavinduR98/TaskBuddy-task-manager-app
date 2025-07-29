@@ -2,8 +2,6 @@ import React from "react";
 import { STATUS_COLORS } from "../../utils/constants";
 
 const RecentTaskTable = ({ tasks }) => {
-    console.log(tasks);
-    
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
