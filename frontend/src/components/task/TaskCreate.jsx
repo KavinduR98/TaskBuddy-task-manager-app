@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import employeeService from "../../services/employeeService";
+import memberService from "../../services/memberService";
 import LoadingSpinner from "../common/LoadingSpinner";
 import taskService from "../../services/taskService";
 
@@ -9,36 +9,33 @@ const TaskCreate = () => {
     const navigate = useNavigate();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [employeeLoading, setEmployeeLoading] = useState(true);
-    const [employees, setEmployees] = useState([]);
+    const [userLoading, setUserLoading] = useState(true);
+    const [users, setUsers] = useState([]);
     const [validationErrors, setValidationErrors] = useState({});
-
+    
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         status: "PENDING",
         priority: "MEDIUM",
         dueDate: "",
-        employeeIds: [],
+        userIds: [],
     });
 
     useEffect(() => {
-        fetchEmployees();
+        fetchUsers();
     }, []);
 
-    const fetchEmployees = async () => {
+    const fetchUsers = async () => {
         try {
-            setEmployeeLoading(true);
-            const response = await employeeService.getAllEmployees();
-
-            // Filter only active employees
-            const activeEmployees = response.filter((emp) => emp.status === "ACTIVE");
-            setEmployees(activeEmployees);
+            setUserLoading(true);
+            const userData = await memberService.getAllUsers();
+            setUsers(userData);
         } catch (error) {
-            console.error("Error fetching employees:", error);
-            setError("Failed to load employees");
+            console.error("Error fetching users:", error);
+            setError("Failed to load users");
         } finally {
-            setEmployeeLoading(false);
+            setUserLoading(false);
         }
     };
 
@@ -58,33 +55,46 @@ const TaskCreate = () => {
         }
     };
 
-    const handleEmployeeSelection = (employeeId) => {
+    const handleUserSelection = (userId) => {
         setFormData((prev) => ({
         ...prev,
-        employeeIds: prev.employeeIds.includes(employeeId)
-            ? prev.employeeIds.filter((id) => id !== employeeId)
-            : [...prev.employeeIds, employeeId],
+        userIds: prev.userIds.includes(userId)
+            ? prev.userIds.filter((id) => id !== userId)
+            : [...prev.userIds, userId],
         }));
     };
 
     const validateForm = () => {
         const errors = {};
-
-        if (!formData.title.trim()) { // Checks if title is empty or just whitespace
-            errors.title = "Title is required";
-        } else if (formData.title.length < 3) {
-            errors.title = "Title must be at least 3 characters";
+        const {title, description, status, priority, dueDate} = formData;
+        
+        if (!title.trim()) {
+            errors.title = 'Title is required';
+        } else if (title.length < 3) {
+            errors.title = 'Title must be at least 3 characters';
         }
 
-        if (formData.description && formData.description.length > 1000) {
-            errors.description = "Description must not exceed 1000 characters";
+        
+        if (!description.trim()) {
+            errors.description = 'Description is required';
+        } else if (description.length > 1000) {
+            errors.description = 'Description must not exceed 1000 characters';
         }
 
-        if (formData.dueDate) {
-            const today = new Date().toISOString().split("T")[0]; // Get today's date in 'YYYY-MM-DD' format
-            if (formData.dueDate < today) {
-                // Compare input date with today's date
-                errors.dueDate = "Due date must be in the future";
+        if (!status) {
+            errors.status = 'Status is required';
+        }
+
+        if (!priority) {
+            errors.priority = 'Priority is required';
+        }
+
+        if (!dueDate) {
+            errors.dueDate = 'Due date is required';
+        } else {
+            const today = new Date().toISOString().split('T')[0];
+            if (dueDate < today) {
+                errors.dueDate = 'Due date must be in the future';
             }
         }
 
@@ -100,18 +110,18 @@ const TaskCreate = () => {
         e.preventDefault();
 
         if (!validateForm()) {
-        return;
+            return;
         }
 
         try {
-        setLoading(true);
-        setError("");
+            setLoading(true);
+            setError("");
 
-        const taskData = {
-            ...formData,
-            employeeIds:
-            formData.employeeIds.length > 0 ? formData.employeeIds : [],
-        };
+            const taskData = {
+                ...formData,
+                userIds:
+                formData.userIds.length > 0 ? formData.userIds : [],
+            };
 
         await taskService.createTask(taskData);
             navigate("/admin/tasks");
@@ -127,7 +137,7 @@ const TaskCreate = () => {
         }
     };
 
-    if (employeeLoading) {
+    if (userLoading) {
         return <LoadingSpinner />;
     }
 
@@ -274,28 +284,28 @@ const TaskCreate = () => {
                             </div>
                         </div>
 
-                        {/* Right side - Assign employees */}
+                        {/* Right side - Assign members */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Assign to Employees
+                                Assign to Members
                             </label>
                             <div className="border border-gray-300 rounded-md p-3 max-h-72 overflow-y-auto">
-                                {employees.length === 0 ? (
+                                {users.length === 0 ? (
                                 <p className="text-gray-500 text-sm">
-                                    No active employees available
+                                    No active members available
                                 </p>
                                 ) : (
                                 <div className="space-y-2">
-                                    {employees.map((emp) => (
-                                    <label key={emp.id} className="flex items-center">
+                                    {users.map((user) => (
+                                    <label key={user.id} className="flex items-center">
                                         <input
                                         type="checkbox"
-                                        checked={formData.employeeIds.includes(emp.id)}
-                                        onChange={() => handleEmployeeSelection(emp.id)}
+                                        checked={formData.userIds.includes(user.id)}
+                                        onChange={() => handleUserSelection(user.id)}
                                         className="mr-2 h-4 w-4 text-indigo-600 border-gray-300 rounded"
                                         />
                                         <span className="text-sm text-gray-700">
-                                        {emp.name} - {emp.department} - {emp.position}
+                                        {user.fullName} - {user.email}
                                         </span>
                                     </label>
                                     ))}
@@ -303,7 +313,7 @@ const TaskCreate = () => {
                                 )}
                             </div>
                             <p className="mt-1 text-sm text-gray-500">
-                                {formData.employeeIds.length} employee(s) selected
+                                {formData.userIds.length} member(s) selected
                             </p>
                         </div>
                     </div>
@@ -314,7 +324,7 @@ const TaskCreate = () => {
                             type="button"
                             onClick={handleCancel}
                             disabled={loading}
-                            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="cursor-pointer px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <X className="h-4 w-4" />
                             Cancel
@@ -322,7 +332,7 @@ const TaskCreate = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed"
+                            className="cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed"
                         >
                             <Save className="h-4 w-4" />
                             {loading ? "Creating..." : "Create Task"}

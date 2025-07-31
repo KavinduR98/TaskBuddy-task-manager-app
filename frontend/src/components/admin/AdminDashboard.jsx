@@ -93,7 +93,7 @@ const AdminDashboard = () => {
                 {/* Greeting and Date */}
                 <div className="mb-4">
                 <h1 className="text-2xl font-bold text-gray-800">
-                    {greeting}! {user.username || "user"}
+                    {greeting}! {user.fullName || "user"}
                 </h1>
                 <p className="text-gray-500 mt-1 text-sm">{formattedDate}</p>
                 </div>
@@ -147,7 +147,7 @@ const AdminDashboard = () => {
                 </h4>
                 <button
                     onClick={() => navigate("/admin/tasks")}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 rounded-md py-2 flex items-center transition-colors text-sm"
+                    className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 rounded-md py-2 flex items-center transition-colors text-sm"
                 >
                     See All
                     <ArrowRight className="w-6 h-4" />

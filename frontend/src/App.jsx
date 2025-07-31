@@ -2,10 +2,7 @@ import { Routes, Route, Navigate  } from 'react-router-dom';
 import { AuthProvider, useAuth  } from './context/AuthContext';
 
 import Layout from './components/common/Layout';
-import EmployeeDashboard from './components/employee/EmployeeDashboard';
 import HomeRedirect from './components/HomeRedirect';
-import EmployeeCreate from './components/employee/EmployeeCreate';
-import EmployeeUpdate from './components/employee/EmployeeUpdate';
 import TaskDashboard from './components/task/TaskDashboard';
 import TaskCreate from './components/task/TaskCreate';
 import TaskUpdate from './components/task/TaskUpdate';
@@ -103,11 +100,6 @@ function App() {
           >
             {/* Admin Dashboard */}
             <Route path="dashboard" element={<AdminDashboard />} />
-            
-            {/* Employee Management Routes */}
-            <Route path="employees" element={<EmployeeDashboard />} />
-            <Route path="employees/create" element={<EmployeeCreate />} />
-            <Route path="employees/edit/:id" element={<EmployeeUpdate />} />
 
             {/* Task Management Routes */}
             <Route path="tasks" element={<TaskDashboard />} />

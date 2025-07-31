@@ -2,7 +2,7 @@ import React from 'react'
 import { STATUS_COLORS, PRIORITY_COLORS} from '../../utils/constants';
 
 const TaskCard = ({ task, onClick }) => {
-
+    
     const formatStatus = (status) => {
         if (!status) return 'N/A';
         return status.replace('_', ' ').charAt(0).toUpperCase() + status.replace('_', ' ').slice(1).toLowerCase();
@@ -51,16 +51,16 @@ const TaskCard = ({ task, onClick }) => {
 
         {/* Assigned employees */}
         <div>
-            {task.assignedEmployees && task.assignedEmployees.length > 0 ? (
+            {task.assignedUsers && task.assignedUsers.length > 0 ? (
                 <div className='flex flex-wrap gap-1 items-center'>
-                    {task.assignedEmployees.slice(0, 2).map((employee) => (
-                        <span key={employee.id} className='bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded'>
-                            {employee.name}
+                    {task.assignedUsers.slice(0, 2).map((user) => (
+                        <span key={user.id} className='bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded'>
+                            {user.fullName}
                         </span>
                     ))}
-                    {task.assignedEmployees.length > 2 && (
+                    {task.assignedUsers.length > 2 && (
                         <span className='text-xs text-gray-500'>
-                            +{task.assignedEmployees.length - 2} more
+                            +{task.assignedUsers.length - 2} more
                         </span>
                     )}
                 </div>
