@@ -58,9 +58,9 @@ public class Task {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "task_employee",
+            name = "task_user",
             joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "employee_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Employee> assignedEmployees = new HashSet<>();
+    private Set<User> assignedUsers = new HashSet<>();
 }

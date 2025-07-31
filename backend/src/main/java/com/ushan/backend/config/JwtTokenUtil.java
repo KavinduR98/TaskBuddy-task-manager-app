@@ -25,13 +25,13 @@ public class JwtTokenUtil {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    public String generateToken(String username, Role role){
-        log.info("Generating JWT token for user: {}", username);
+    public String generateToken(String email, Role role){
+        log.info("Generating JWT token for user: {}", email);
 
         Date expiryDate = new Date(System.currentTimeMillis() + jwtExpirationInMs);
 
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .claim("role", role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
@@ -39,7 +39,7 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    public String getUsernameFromToken(String token){
+    public String getEmailFromToken(String token){
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

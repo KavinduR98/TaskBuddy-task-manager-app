@@ -36,5 +36,5 @@ public class TaskRequestDTO {
     @Future(message = "Due date must be in the future")
     private LocalDate dueDate;
 
-    private Set<Long> employeeIds = new HashSet<>();
+    private Set<Long> userIds = new HashSet<>();
 }

@@ -24,5 +24,5 @@ public class TaskResponseDTO {
     private LocalDate dueDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Set<EmployeeSummaryDTO> assignedEmployees;
+    private Set<UserSummaryDTO> assignedUsers;
 }

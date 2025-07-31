@@ -4,6 +4,7 @@ import com.ushan.backend.service.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -70,9 +71,20 @@ public class SecurityConfig {
                 )
                 // Define authorization rules for HTTP requests
                 .authorizeHttpRequests(auths -> auths
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/employees/**").hasRole("ADMIN")
-                        .requestMatchers("/api/tasks/**").hasRole("ADMIN")
+                        // Public endpoints
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+
+
+                        // Admin only endpoints
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/tasks").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/tasks/**").hasRole("ADMIN")
+
+                        // Both Admin and Team Member can access
+                        .requestMatchers(HttpMethod.GET, "/api/tasks").hasAnyRole("ADMIN", "TEAM_MEMBER")
+                        .requestMatchers(HttpMethod.GET, "/api/tasks/**").hasAnyRole("ADMIN", "TEAM_MEMBER")
+                        .requestMatchers("/api/team-member/**").hasRole("TEAM_MEMBER")
                         .anyRequest().authenticated()
                 );
 

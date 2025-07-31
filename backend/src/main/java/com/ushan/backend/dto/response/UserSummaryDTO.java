@@ -1,5 +1,6 @@
 package com.ushan.backend.dto.response;
 
+import com.ushan.backend.util.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EmployeeSummaryDTO {
+public class UserSummaryDTO {
     private Long id;
-    private String name;
+    private String fullName;
     private String email;
-    private String department;
-    private String position;
+    private Role role;
 }

@@ -1,6 +1,6 @@
 package com.ushan.backend.dto.response;
 
-import com.ushan.backend.util.EmployeeStatus;
+import com.ushan.backend.util.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,14 +12,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EmployeeResponseDTO {
+public class RegistrationResponseDTO {
     private Long id;
-    private String name;
+    private String fullName;
     private String email;
-    private String department;
-    private String position;
-    private String phoneNumber;
-    private EmployeeStatus status;
+    private Role role;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }

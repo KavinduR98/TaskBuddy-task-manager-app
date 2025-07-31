@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class LoginResponseDTO {
     private String token;
     private String type = "Bearer";
-    private String username;
+    private String fullName;
     private String email;
     private Role role;
     private LocalDateTime expiresAt;

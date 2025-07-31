@@ -1,13 +1,13 @@
 package com.ushan.backend.service;
 
 import com.ushan.backend.dto.request.TaskRequestDTO;
-import com.ushan.backend.dto.response.EmployeeSummaryDTO;
+import com.ushan.backend.dto.response.UserSummaryDTO;
 import com.ushan.backend.dto.response.TaskResponseDTO;
-import com.ushan.backend.entity.Employee;
 import com.ushan.backend.entity.Task;
+import com.ushan.backend.entity.User;
 import com.ushan.backend.exception.ResourceNotFoundException;
-import com.ushan.backend.repository.EmployeeRepository;
 import com.ushan.backend.repository.TaskRepository;
+import com.ushan.backend.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -24,21 +24,21 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final EmployeeRepository employeeRepository;
 
-    public TaskService(TaskRepository taskRepository, ModelMapper modelMapper, EmployeeRepository employeeRepository) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository, ModelMapper modelMapper) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
         this.modelMapper = modelMapper;
-        this.employeeRepository = employeeRepository;
     }
 
     @Transactional(readOnly = true)
     public List<TaskResponseDTO> getAllTasks(){
         log.info("Fetching all tasks");
-        List<Task> tasks = taskRepository.findAllWithEmployees(); // Use custom query with JOIN FETCH
+        List<Task> tasks = taskRepository.findAllWithUsers(); // Use custom query with JOIN FETCH
         for (Task task : tasks) {
-            log.info("Task {} has {} assigned employees", task.getTitle(), task.getAssignedEmployees().size());
+            log.info("Task {} has {} assigned employees", task.getTitle(), task.getAssignedUsers().size());
         }
         return tasks.stream()
                 .map(this::convertToResponseDTO)
@@ -50,15 +50,15 @@ public class TaskService {
 
         Task task = modelMapper.map(requestDTO, Task.class);
 
-        // Set assigned employees
-        if (requestDTO.getEmployeeIds() != null && !requestDTO.getEmployeeIds().isEmpty()) {
-            Set<Employee> employees = new HashSet<>();
-            for (Long employeeId : requestDTO.getEmployeeIds()) {
-                Employee employee = employeeRepository.findById(employeeId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
-                employees.add(employee);
+        // Set assigned users
+        if (requestDTO.getUserIds() != null && !requestDTO.getUserIds().isEmpty()) {
+            Set<User> assignedUsers = new HashSet<>();
+            for (Long userId : requestDTO.getUserIds()) {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                assignedUsers.add(user);
             }
-            task.setAssignedEmployees(employees);
+            task.setAssignedUsers(assignedUsers);
         }
 
         Task savedTask = taskRepository.save(task);
@@ -81,15 +81,15 @@ public class TaskService {
 
         modelMapper.map(requestDTO, existingTask);
 
-        // Update assigned employees
-        if (requestDTO.getEmployeeIds() != null){
-            Set<Employee> employees = new HashSet<>();
-            for (Long employeeId : requestDTO.getEmployeeIds()){
-                Employee employee = employeeRepository.findById(employeeId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
-                employees.add(employee);
+        // Update assigned users
+        if (requestDTO.getUserIds() != null){
+            Set<User> users = new HashSet<>();
+            for (Long userId : requestDTO.getUserIds()){
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                users.add(user);
             }
-            existingTask.setAssignedEmployees(employees);
+            existingTask.setAssignedUsers(users);
         }
         Task updatedTask = taskRepository.save(existingTask);
         return convertToResponseDTO(updatedTask);
@@ -108,17 +108,16 @@ public class TaskService {
         TaskResponseDTO responseDTO = modelMapper.map(task, TaskResponseDTO.class);
 
         // Force initialization of the collection and then convert
-        Set<EmployeeSummaryDTO> employeeSummaries = task.getAssignedEmployees().stream()
-                .map(employee -> EmployeeSummaryDTO.builder()
-                        .id(employee.getId())
-                        .name(employee.getName())
-                        .email(employee.getEmail())
-                        .department(employee.getDepartment())
-                        .position(employee.getPosition())
+        Set<UserSummaryDTO> userSummaries = task.getAssignedUsers().stream()
+                .map(user -> UserSummaryDTO.builder()
+                        .id(user.getId())
+                        .fullName(user.getFullName())
+                        .email(user.getEmail())
+                        .role(user.getRole())
                         .build())
                 .collect(Collectors.toSet());
 
-        responseDTO.setAssignedEmployees(employeeSummaries);
+        responseDTO.setAssignedUsers(userSummaries);
         return responseDTO;
     }
 }

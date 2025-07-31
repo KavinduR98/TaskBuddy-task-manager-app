@@ -20,7 +20,7 @@ public class ModelMapperConfig {
 
         // Skip the assignedEmployees field to avoid Hibernate lazy loading issues
         mapper.typeMap(Task.class, TaskResponseDTO.class)
-                .addMappings(mapping -> mapping.skip(TaskResponseDTO::setAssignedEmployees));
+                .addMappings(mapping -> mapping.skip(TaskResponseDTO::setAssignedUsers));
 
         return mapper;
     }

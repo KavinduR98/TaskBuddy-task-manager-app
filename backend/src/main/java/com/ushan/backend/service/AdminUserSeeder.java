@@ -28,17 +28,17 @@ public class AdminUserSeeder {
         log.info("Checking for existing admin user to seed if necessary...");
 
         // Check if an admin user already exists
-        if (userRepository.findByUsername("admin").isEmpty()) {
+        if (userRepository.findByEmail("admin@taskmanager.com").isEmpty()) {
             log.info("Admin user not found. Seeding new admin user.");
 
             User adminUser = new User();
-            adminUser.setUsername("admin");
+            adminUser.setFullName("System Admin");
             adminUser.setEmail("admin@taskmanager.com"); // Add a default email
             adminUser.setPassword(passwordEncoder.encode("password")); // Hash the password
             adminUser.setRole(Role.ADMIN); // Set the role to ADMIN
 
             userRepository.save(adminUser);
-            log.info("Admin user 'admin' seeded successfully with password 'password'.");
+            log.info("Admin user 'admin@taskmanager.com' seeded successfully with password 'password'.");
         } else {
             log.info("Admin user 'admin' already exists. Skipping seeding.");
         }
