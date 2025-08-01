@@ -7,6 +7,7 @@ import TaskDashboard from './components/task/TaskDashboard';
 import TaskCreate from './components/task/TaskCreate';
 import TaskUpdate from './components/task/TaskUpdate';
 import AdminDashboard from './components/admin/AdminDashboard'
+import TeamMembers from './components/members/TeamMembers';
 
 // Protected Route for authenticated ADMIN users only
 const AdminProtectedRoute = ({ children }) => {
@@ -105,6 +106,9 @@ function App() {
             <Route path="tasks" element={<TaskDashboard />} />
             <Route path="tasks/create" element={<TaskCreate />} />
             <Route path="tasks/edit/:id" element={<TaskUpdate />} />
+
+            {/* Team Members */}
+            <Route path="team-members" element={<TeamMembers />} />
           </Route>
 
           {/* Employee Routes */}

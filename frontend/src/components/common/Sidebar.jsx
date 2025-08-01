@@ -36,7 +36,7 @@ const Sidebar = () => {
             icon: Plus
         },
         {
-            path: '/admin/employees',
+            path: '/admin/team-members',
             name: 'Team Members',
             icon: Users
         }
