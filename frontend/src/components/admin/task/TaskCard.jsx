@@ -1,5 +1,5 @@
 import React from 'react'
-import { STATUS_COLORS, PRIORITY_COLORS} from '../../utils/constants';
+import { STATUS_COLORS, PRIORITY_COLORS} from '../../../utils/constants';
 
 const TaskCard = ({ task, onClick }) => {
     

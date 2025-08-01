@@ -3,11 +3,11 @@ import { AuthProvider, useAuth  } from './context/AuthContext';
 
 import Layout from './components/common/Layout';
 import HomeRedirect from './components/HomeRedirect';
-import TaskDashboard from './components/task/TaskDashboard';
-import TaskCreate from './components/task/TaskCreate';
-import TaskUpdate from './components/task/TaskUpdate';
-import AdminDashboard from './components/admin/AdminDashboard'
-import TeamMembers from './components/members/TeamMembers';
+import TaskDashboard from './components/admin/task/TaskDashboard';
+import TaskCreate from './components/admin/task/TaskCreate';
+import TaskUpdate from './components/admin/task/TaskUpdate';
+import AdminDashboard from './components/admin/dashboard/AdminDashboard'
+import TeamMembers from './components/admin/members/TeamMembers';
 
 // Protected Route for authenticated ADMIN users only
 const AdminProtectedRoute = ({ children }) => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import taskService from '../../services/taskService';
-import LoadingSpinner from '../common/LoadingSpinner';
+import taskService from '../../../services/taskService';
+import LoadingSpinner from '../../common/LoadingSpinner';
 import TaskCard from './TaskCard';
 import { useNavigate } from 'react-router-dom';
 

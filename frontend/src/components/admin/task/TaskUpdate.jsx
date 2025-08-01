@@ -1,66 +1,82 @@
-import React, { useEffect, useState } from "react";
-import { X, Save } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import memberService from "../../services/memberService";
-import LoadingSpinner from "../common/LoadingSpinner";
-import taskService from "../../services/taskService";
+import React, {useState, useEffect} from 'react'
+import { Save, Trash2, X } from 'lucide-react';
+import { useNavigate, useParams  } from 'react-router-dom';
+import memberService from '../../../services/memberService';
+import taskService from '../../../services/taskService';
+import LoadingSpinner from '../../common/LoadingSpinner'
 
-const TaskCreate = () => {
+
+const TaskUpdate = () => {
+
     const navigate = useNavigate();
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [userLoading, setUserLoading] = useState(true);
-    const [users, setUsers] = useState([]);
-    const [validationErrors, setValidationErrors] = useState({});
-    
+    const { id } = useParams();
+
     const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        status: "PENDING",
-        priority: "MEDIUM",
-        dueDate: "",
-        userIds: [],
+        title: '',
+        description: '',
+        status: 'PENDING',
+        priority: 'MEDIUM',
+        dueDate: '',
+        userIds: []
     });
-
+    const [error, setError] = useState('');
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
+    const [validationErrors, setValidationErrors] = useState({});
+   
     useEffect(() => {
-        fetchUsers();
-    }, []);
+        fetchData();
+    }, [id]);
 
-    const fetchUsers = async () => {
+    const fetchData = async () => {
         try {
-            setUserLoading(true);
-            const userData = await memberService.getAllUsers();
-            setUsers(userData);
+            setInitialLoading(true);
+            const [task, allUsers] = await Promise.all([
+                taskService.getTaskById(id),
+                memberService.getAllUsers(),
+            ]);
+
+            setUsers(allUsers);
+            console.log(task);
+            setFormData({
+                title: task.title || '',
+                description: task.description || '',
+                status: task.status || 'PENDING',
+                priority: task.priority || 'MEDIUM',
+                dueDate: task.dueDate || '',
+                userIds: task.assignedUsers?.map(user => user.id) || [],
+            });
         } catch (error) {
-            console.error("Error fetching users:", error);
-            setError("Failed to load users");
+            console.error('Error initializing form:', error);
+            setError('Failed to load task or employee data');
         } finally {
-            setUserLoading(false);
+            setInitialLoading(false);
         }
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
+        setFormData(prev => ({
             ...prev,
-            [name]: value,
+            [name]: value
         }));
-
+        
         // Clear validation error when user starts typing
         if (validationErrors[name]) {
-        setValidationErrors((prev) => ({
+        setValidationErrors(prev => ({
             ...prev,
-            [name]: "",
+            [name]: ''
         }));
         }
     };
 
     const handleUserSelection = (userId) => {
-        setFormData((prev) => ({
-        ...prev,
-        userIds: prev.userIds.includes(userId)
-            ? prev.userIds.filter((id) => id !== userId)
-            : [...prev.userIds, userId],
+        setFormData(prev => ({
+            ...prev,
+            userIds: prev.userIds.includes(userId)
+                ? prev.userIds.filter(id => id !== userId)
+                : [...prev.userIds, userId]
         }));
     };
 
@@ -102,10 +118,6 @@ const TaskCreate = () => {
         return Object.keys(errors).length === 0;
     };
 
-    const handleCancel = () => {
-        navigate("/admin/tasks");
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -115,38 +127,66 @@ const TaskCreate = () => {
 
         try {
             setLoading(true);
-            setError("");
+            setError('');
 
             const taskData = {
                 ...formData,
-                userIds:
-                formData.userIds.length > 0 ? formData.userIds : [],
+                userIds: formData.userIds.length > 0 ? formData.userIds : []
             };
 
-        await taskService.createTask(taskData);
-            navigate("/admin/tasks");
+            await taskService.updateTask(id, taskData);
+            navigate('/admin/tasks');
         } catch (error) {
-            console.error("Error creating task:", error);
-        if (error.response?.data?.validationErrors) {
-            setValidationErrors(error.response.data.validationErrors);
-        } else {
-            setError(error.response?.data?.message || "Failed to create task");
-        }
+            console.error('Error updating task:', error);
+            if (error.response?.data?.validationErrors) {
+                setValidationErrors(error.response.data.validationErrors);
+            } else {
+                setError(error.response?.data?.message || 'Failed to update task');
+            }
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
+    }
+
+    const handleDelete = async () => {
+        if (window.confirm("Are you sure you want to delete this task?")) {
+            try {
+                setLoading(true);
+                await taskService.deleteTask(taskId);
+                navigate("/admin/tasks");
+            } catch (error) {
+                console.error("Delete failed:", error);
+                setError("Failed to delete task. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        }
+    }
+
+    const handleCancel = () => {
+        navigate('/admin/tasks');
     };
 
-    if (userLoading) {
+    if (initialLoading) {
         return <LoadingSpinner />;
     }
 
-    return (
+  return (
         <div className="bg-white shadow-md rounded-lg p-6">
             <div className="max-w-8xl mx-auto">
-                <h1 className="text-lg font-bold text-gray-900 mb-4">
-                    Create New Task
-                </h1>
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-lg font-bold text-gray-900">
+                        Update Task
+                    </h1>
+                    <button
+                        type="button"
+                        onClick={handleDelete}
+                        className="text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 px-3 py-1 rounded-md text-sm font-medium flex items-center gap-2 cursor-pointer"
+                    >
+                        <Trash2 className='h-4 w-4'/>
+                        Delete
+                    </button>
+                </div>
 
                 {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
@@ -292,7 +332,7 @@ const TaskCreate = () => {
                             <div className="border border-gray-300 rounded-md p-3 max-h-72 overflow-y-auto">
                                 {users.length === 0 ? (
                                 <p className="text-gray-500 text-sm">
-                                    No active members available
+                                    No active users available
                                 </p>
                                 ) : (
                                 <div className="space-y-2">
@@ -324,7 +364,7 @@ const TaskCreate = () => {
                             type="button"
                             onClick={handleCancel}
                             disabled={loading}
-                            className="cursor-pointer px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             <X className="h-4 w-4" />
                             Cancel
@@ -332,16 +372,16 @@ const TaskCreate = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed cursor-pointer"
                         >
                             <Save className="h-4 w-4" />
-                            {loading ? "Creating..." : "Create Task"}
+                            {loading ? 'Updating...' : 'Update Task'}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default TaskCreate;
+export default TaskUpdate

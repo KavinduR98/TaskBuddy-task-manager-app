@@ -70,7 +70,7 @@ const Sidebar = () => {
                 
                 {/* Username */}
                 <h3 className='font-semibold text-gray-800 text-sm mb-1'>
-                    {user?.username || 'User'}
+                    {user?.fullName || 'User'}
                 </h3>
                 
                 {/* Email */}

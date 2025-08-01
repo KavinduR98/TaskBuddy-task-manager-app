@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import DataTable from 'react-data-table-component'
-import memberService from '../../services/memberService';
+import memberService from '../../../services/memberService';
 import { X } from 'lucide-react';
 
 const TeamMembers = () => {

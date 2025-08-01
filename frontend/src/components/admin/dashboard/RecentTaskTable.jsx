@@ -1,5 +1,5 @@
 import React from "react";
-import { STATUS_COLORS } from "../../utils/constants";
+import { STATUS_COLORS } from "../../../utils/constants";
 
 const RecentTaskTable = ({ tasks }) => {
 

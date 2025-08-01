@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { STATUS_COLORS } from "../../utils/constants";
+import { useAuth } from "../../../context/AuthContext";
+import { STATUS_COLORS } from "../../../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import taskService from "../../services/taskService";
-import LoadingSpinner from "../common/LoadingSpinner";
+import taskService from "../../../services/taskService";
+import LoadingSpinner from "../../common/LoadingSpinner";
 import RecentTaskTable from "./RecentTaskTable";
 import CardSection from "./CardSection";
 import StatCard from "./StatCard";
@@ -21,8 +21,8 @@ import {
 import { Pie, Bar } from 'react-chartjs-2';
 
 // Import utility functions and chart options
-import {getTaskDistributionData, getTaskPriorityData} from '../../utils/chartDataUtils';
-import {pieChartOptions, barChartOptions} from '../../utils/chartOptions';
+import {getTaskDistributionData, getTaskPriorityData} from '../../../utils/chartDataUtils';
+import {pieChartOptions, barChartOptions} from '../../../utils/chartOptions';
 
 // Register Chart.js components
 ChartJS.register(
