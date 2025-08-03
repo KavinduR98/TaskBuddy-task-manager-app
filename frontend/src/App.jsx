@@ -8,6 +8,8 @@ import TaskCreate from './components/admin/task/TaskCreate';
 import TaskUpdate from './components/admin/task/TaskUpdate';
 import AdminDashboard from './components/admin/dashboard/AdminDashboard'
 import TeamMembers from './components/admin/members/TeamMembers';
+import MemberDashboard from './components/team-member/MemberDashboard';
+import MyTasks from './components/team-member/MyTasks';
 
 // Protected Route for authenticated ADMIN users only
 const AdminProtectedRoute = ({ children }) => {
@@ -61,12 +63,12 @@ const EmployeeProtectedRoute = ({ children }) => {
     return <Navigate to="/" replace />;
   }
   
-  if (user?.role !== 'EMPLOYEE') {
+  if (user?.role !== 'MEMBER') {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-red-600 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-4">Employee access required</p>
+          <p className="text-gray-600 mb-4">Member access required</p>
           <button 
             onClick={() => window.location.href = '/'}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -111,8 +113,18 @@ function App() {
             <Route path="team-members" element={<TeamMembers />} />
           </Route>
 
-          {/* Employee Routes */}
-          {/* Coming soon... */}
+          {/* Members Routes */}
+          <Route
+            path="/member/*"
+            element={
+              <EmployeeProtectedRoute>
+                <Layout />
+              </EmployeeProtectedRoute>
+            }
+          >
+            <Route path='dashboard' element={<MemberDashboard />}/>
+            <Route path='my-tasks' element={<MyTasks />}/>
+          </Route>
 
           {/* Catch-all for 404 Not Found pages */}
           <Route 

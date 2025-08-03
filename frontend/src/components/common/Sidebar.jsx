@@ -44,7 +44,16 @@ const Sidebar = () => {
 
     // Employee navigation items
     const employeeNavItems = [
-        // Coming soon...
+        {
+            path: '/member/dashboard',
+            name: 'Dashboard',
+            icon: BarChart3
+        },
+        {
+            path: '/member/my-tasks',
+            name: 'My Tasks',
+            icon: CheckSquare
+        }
     ];
 
     // Select navigation items based on user role and current path

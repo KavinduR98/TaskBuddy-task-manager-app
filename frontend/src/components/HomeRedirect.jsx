@@ -22,8 +22,8 @@ const HomeRedirect = () => {
   // Redirect based on user role
   if (user?.role === 'ADMIN') {
     return <Navigate to="/admin/dashboard" replace />;
-  } else if (user?.role === 'EMPLOYEE') {
-    return <Navigate to="/employee/dashboard" replace />;
+  } else if (user?.role === 'MEMBER') {
+    return <Navigate to="/member/dashboard" replace />;
   }
 
   // For users with unknown roles

@@ -64,6 +64,15 @@ const taskService = {
         } catch (error) {
             throw error.response?.data || { message: 'Failed to update task' };
         }
+    },
+
+    getMyTasks: async (id) => {
+        try {
+            const response = await api.get(`/tasks/my-tasks/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || {message: 'Failed to fetch my tasks'}; 
+        }
     }
 }
 
