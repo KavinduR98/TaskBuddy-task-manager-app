@@ -82,9 +82,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/tasks/**").hasRole("ADMIN")
 
                         // Both Admin and Team Member can access
-                        .requestMatchers(HttpMethod.GET, "/api/tasks").hasAnyRole("ADMIN", "TEAM_MEMBER")
-                        .requestMatchers(HttpMethod.GET, "/api/tasks/**").hasAnyRole("ADMIN", "TEAM_MEMBER")
-                        .requestMatchers("/api/team-member/**").hasRole("TEAM_MEMBER")
+                        .requestMatchers(HttpMethod.GET, "/api/tasks").hasAnyRole("ADMIN", "MEMBER")
+                        .requestMatchers(HttpMethod.GET, "/api/tasks/**").hasAnyRole("ADMIN", "MEMBER")
+                        .requestMatchers("/api/team-member/**").hasRole("MEMBER")
                         .anyRequest().authenticated()
                 );
 

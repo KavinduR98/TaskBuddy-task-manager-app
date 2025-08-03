@@ -104,6 +104,15 @@ public class TaskService {
         log.info("Task deleted successfully with id: {}", id);
     }
 
+    @Transactional(readOnly = true)
+    public List<TaskResponseDTO> getMyTasks(Long userId){
+        log.info("Fetching tasks for user with id: {}", userId);
+        List<Task> tasks = taskRepository.findTasksByUserId(userId);
+        return tasks.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     private TaskResponseDTO convertToResponseDTO(Task task){
         TaskResponseDTO responseDTO = modelMapper.map(task, TaskResponseDTO.class);
 
@@ -120,4 +129,5 @@ public class TaskService {
         responseDTO.setAssignedUsers(userSummaries);
         return responseDTO;
     }
+
 }

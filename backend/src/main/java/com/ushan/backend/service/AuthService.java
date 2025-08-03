@@ -57,6 +57,7 @@ public class AuthService {
         log.info("User authenticated successfully: {}", user.getEmail());
 
         return LoginResponseDTO.builder()
+                .id(user.getId())
                 .token(token)
                 .type("Bearer")
                 .fullName(user.getFullName())
