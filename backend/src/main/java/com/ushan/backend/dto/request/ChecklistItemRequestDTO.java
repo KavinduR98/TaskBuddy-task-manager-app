@@ -1,14 +1,4 @@
-package com.ushan.backend.dto;
+package com.ushan.backend.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ChecklistItemDTO {
-    private
+public class ChecklistItemRequestDTO {
 }

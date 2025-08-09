@@ -22,6 +22,7 @@ import { Pie, Bar } from 'react-chartjs-2';
 // Import utility functions and chart options
 import {getTaskDistributionData, getTaskPriorityData} from '../../utils/chartDataUtils';
 import {pieChartOptions, barChartOptions} from '../../utils/chartOptions';
+import { useNavigate } from 'react-router-dom';
 
 // Register Chart.js components
 ChartJS.register(
@@ -37,6 +38,7 @@ ChartJS.register(
 const MemberDashboard = () => {
 
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [tasks, setTasks] = useState([]);
@@ -145,7 +147,7 @@ const MemberDashboard = () => {
                     Recent Tasks
                 </h4>
                 <button
-                    onClick={() => navigate("/admin/tasks")}
+                    onClick={() => navigate("/member/my-tasks")}
                     className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-900 px-4 rounded-md py-2 flex items-center transition-colors text-sm"
                 >
                     See All
