@@ -1,11 +1,15 @@
 package com.ushan.backend.service;
 
+import com.ushan.backend.dto.request.ChecklistItemRequestDTO;
 import com.ushan.backend.dto.request.TaskRequestDTO;
+import com.ushan.backend.dto.response.ChecklistItemResponseDTO;
 import com.ushan.backend.dto.response.UserSummaryDTO;
 import com.ushan.backend.dto.response.TaskResponseDTO;
+import com.ushan.backend.entity.ChecklistItem;
 import com.ushan.backend.entity.Task;
 import com.ushan.backend.entity.User;
 import com.ushan.backend.exception.ResourceNotFoundException;
+import com.ushan.backend.repository.ChecklistItemRepository;
 import com.ushan.backend.repository.TaskRepository;
 import com.ushan.backend.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,11 +30,13 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final ChecklistItemRepository checklistItemRepository;
     private final ModelMapper modelMapper;
 
-    public TaskService(TaskRepository taskRepository, UserRepository userRepository, ModelMapper modelMapper) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository, ChecklistItemRepository checklistItemRepository, ModelMapper modelMapper) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+        this.checklistItemRepository = checklistItemRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -59,6 +66,20 @@ public class TaskService {
                 assignedUsers.add(user);
             }
             task.setAssignedUsers(assignedUsers);
+        }
+
+        // Handle checklist items
+        if (requestDTO.getChecklistItems() != null && !requestDTO.getChecklistItems().isEmpty()) {
+            List<ChecklistItem> checklistItems = new ArrayList<>();
+            for (ChecklistItemRequestDTO itemDTO : requestDTO.getChecklistItems()) {
+                ChecklistItem item = ChecklistItem.builder()
+                        .text(itemDTO.getText())
+                        .completed(itemDTO.getCompleted() != null ? itemDTO.getCompleted() : false)
+                        .task(task)
+                        .build();
+                checklistItems.add(item);
+            }
+            task.setChecklistItems(checklistItems);
         }
 
         Task savedTask = taskRepository.save(task);
@@ -92,6 +113,7 @@ public class TaskService {
             existingTask.setAssignedUsers(users);
         }
         Task updatedTask = taskRepository.save(existingTask);
+        log.info("Task updated successfully with id: {}", updatedTask.getId());
         return convertToResponseDTO(updatedTask);
     }
 
@@ -113,6 +135,51 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public TaskResponseDTO getMyTaskById(Long userId, Long taskId) {
+        log.info("Fetching task {} for user {}", taskId, userId);
+
+        // First check if the task exists and the user has access to it
+        Task task = taskRepository.findTaskByIdAndUserId(taskId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId + " or access denied"));
+
+        // Fetch the task with users
+        Task taskWithUsers = taskRepository.findTaskByIdWithUsers(taskId).orElse(task);
+
+        // Fetch the task with checklist items
+        Task taskWithChecklist = taskRepository.findTaskByIdWithChecklistItems(taskId).orElse(task);
+
+        task.setAssignedUsers(taskWithUsers.getAssignedUsers());
+        task.setChecklistItems(taskWithChecklist.getChecklistItems());
+
+        return convertToResponseDTO(task);
+    }
+
+    @Transactional
+    public ChecklistItemResponseDTO updateChecklistItem(Long taskId, Long itemId, ChecklistItemRequestDTO requestDTO) {
+
+        log.info("TaskId: {}, ItemId: {}, New Completed Status: {}", taskId, itemId, requestDTO.getCompleted());
+
+        ChecklistItem checklistItem = checklistItemRepository.findByIdAndTaskId(itemId, taskId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Checklist item not found with id: %d for task: %d", itemId, taskId)
+                ));
+
+        if (requestDTO.getCompleted() != null) {
+            checklistItem.setCompleted(requestDTO.getCompleted());
+        }
+
+        ChecklistItem updatedItem = checklistItemRepository.saveAndFlush(checklistItem);
+
+        log.info("AFTER SAVE - Item ID: {}, Completed: {}", updatedItem.getId(), updatedItem.getCompleted());
+
+        return ChecklistItemResponseDTO.builder()
+                .id(updatedItem.getId())
+                .text(updatedItem.getText())
+                .completed(updatedItem.getCompleted())
+                .build();
+    }
+
     private TaskResponseDTO convertToResponseDTO(Task task){
         TaskResponseDTO responseDTO = modelMapper.map(task, TaskResponseDTO.class);
 
@@ -127,6 +194,18 @@ public class TaskService {
                 .collect(Collectors.toSet());
 
         responseDTO.setAssignedUsers(userSummaries);
+
+        // Force initialization of checklist items and convert
+        List<ChecklistItemResponseDTO> checklistItemDTOs = task.getChecklistItems().stream()
+                .map(item -> ChecklistItemResponseDTO.builder()
+                        .id(item.getId())
+                        .text(item.getText())
+                        .completed(item.getCompleted())
+                        .build())
+                .collect(Collectors.toList());
+
+        responseDTO.setChecklistItems(checklistItemDTOs);
+
         return responseDTO;
     }
 

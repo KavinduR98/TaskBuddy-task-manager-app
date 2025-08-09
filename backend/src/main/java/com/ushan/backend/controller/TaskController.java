@@ -1,6 +1,8 @@
 package com.ushan.backend.controller;
 
+import com.ushan.backend.dto.request.ChecklistItemRequestDTO;
 import com.ushan.backend.dto.request.TaskRequestDTO;
+import com.ushan.backend.dto.response.ChecklistItemResponseDTO;
 import com.ushan.backend.dto.response.TaskResponseDTO;
 import com.ushan.backend.service.TaskService;
 import jakarta.validation.Valid;
@@ -71,5 +73,26 @@ public class TaskController {
         log.info("GET /api/tasks/my-tasks/{} - Fetching tasks for user", userId);
         List<TaskResponseDTO> tasks = taskService.getMyTasks(userId);
         return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/my-tasks/{userId}/{taskId}")
+    public ResponseEntity<TaskResponseDTO> getMyTaskById(
+            @PathVariable Long userId,
+            @PathVariable Long taskId
+    ){
+        log.info("GET /api/tasks/my-tasks/{}/{} - Fetching specific task for user", userId, taskId);
+        TaskResponseDTO task = taskService.getMyTaskById(userId, taskId);
+        return ResponseEntity.ok(task);
+    }
+
+    @PutMapping("/{taskId}/checklist/{itemId}")
+    public ResponseEntity<ChecklistItemResponseDTO> updateChecklistItem(
+            @PathVariable Long taskId,
+            @PathVariable Long itemId,
+            @RequestBody ChecklistItemRequestDTO itemRequestDTO
+    ) {
+        log.info("PUT /api/tasks/{}/checklist/{} - Updating checklist item", taskId, itemId);
+        ChecklistItemResponseDTO updatedItem = taskService.updateChecklistItem(taskId, itemId, itemRequestDTO);
+        return ResponseEntity.ok(updatedItem);
     }
 }

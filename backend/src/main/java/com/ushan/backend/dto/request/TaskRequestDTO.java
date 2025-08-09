@@ -12,7 +12,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -37,4 +39,6 @@ public class TaskRequestDTO {
     private LocalDate dueDate;
 
     private Set<Long> userIds = new HashSet<>();
+
+    private List<ChecklistItemRequestDTO> checklistItems = new ArrayList<>();
 }

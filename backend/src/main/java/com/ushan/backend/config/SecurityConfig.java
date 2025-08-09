@@ -78,10 +78,15 @@ public class SecurityConfig {
                         // Admin only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/tasks").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/tasks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/tasks/**").hasRole("ADMIN")
 
-                        // Both Admin and Team Member can access
+                        // Checklist update for members
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/*/checklist/**").hasRole("MEMBER")
+
+                        // Task update for admin
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/**").hasRole("ADMIN")
+
+                        // Both Admin and Member
                         .requestMatchers(HttpMethod.GET, "/api/tasks").hasAnyRole("ADMIN", "MEMBER")
                         .requestMatchers(HttpMethod.GET, "/api/tasks/**").hasAnyRole("ADMIN", "MEMBER")
                         .requestMatchers("/api/team-member/**").hasRole("MEMBER")
