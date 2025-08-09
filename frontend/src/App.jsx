@@ -10,6 +10,8 @@ import AdminDashboard from './components/admin/dashboard/AdminDashboard'
 import TeamMembers from './components/admin/members/TeamMembers';
 import MemberDashboard from './components/team-member/MemberDashboard';
 import MyTasks from './components/team-member/MyTasks';
+import ViewMemberTask from './components/team-member/ViewMemberTask';
+import Register from './components/auth/Register';
 
 // Protected Route for authenticated ADMIN users only
 const AdminProtectedRoute = ({ children }) => {
@@ -92,6 +94,8 @@ function App() {
           {/* Home redirect based on authentication and role */}
           <Route path="/" element={<HomeRedirect />} />
 
+          <Route path="/register" element={<Register />} />
+
           {/* Admin Routes */}
           <Route
             path="/admin/*"
@@ -124,6 +128,7 @@ function App() {
           >
             <Route path='dashboard' element={<MemberDashboard />}/>
             <Route path='my-tasks' element={<MyTasks />}/>
+            <Route path='tasks/edit/:id' element={<ViewMemberTask />}/>
           </Route>
 
           {/* Catch-all for 404 Not Found pages */}
