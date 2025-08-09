@@ -46,9 +46,9 @@ const MyTasks = () => {
     }
 
     const handleCardClick = (taskId) => {
-        navigate(`/admin/tasks/edit/${taskId}`);
+        navigate(`/member/tasks/edit/${taskId}`);
     }
-    console.log(tasks);
+    // console.log(tasks);
     
 
     const stats = taskService.getTaskStats(tasks);

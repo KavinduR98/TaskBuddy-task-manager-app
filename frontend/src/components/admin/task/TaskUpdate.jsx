@@ -24,6 +24,7 @@ const TaskUpdate = () => {
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [validationErrors, setValidationErrors] = useState({});
+    const [checklistItems, setChecklistItems] = useState([]);
    
     useEffect(() => {
         fetchData();
@@ -47,6 +48,7 @@ const TaskUpdate = () => {
                 dueDate: task.dueDate || '',
                 userIds: task.assignedUsers?.map(user => user.id) || [],
             });
+            setChecklistItems(task.checklistItems || []);
         } catch (error) {
             console.error('Error initializing form:', error);
             setError('Failed to load task or employee data');
@@ -148,11 +150,19 @@ const TaskUpdate = () => {
         }
     }
 
+    const hasCompletedItems = checklistItems.some(item => item.completed);
+
     const handleDelete = async () => {
+
+        if (hasCompletedItems) {
+            setError("Cannot delete task with completed checklist items.");
+            return;
+        }
+
         if (window.confirm("Are you sure you want to delete this task?")) {
             try {
                 setLoading(true);
-                await taskService.deleteTask(taskId);
+                await taskService.deleteTask(id);
                 navigate("/admin/tasks");
             } catch (error) {
                 console.error("Delete failed:", error);
@@ -178,10 +188,16 @@ const TaskUpdate = () => {
                     <h1 className="text-lg font-bold text-gray-900">
                         Update Task
                     </h1>
-                    <button
+                     <button
                         type="button"
                         onClick={handleDelete}
-                        className="text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 px-3 py-1 rounded-md text-sm font-medium flex items-center gap-2 cursor-pointer"
+                        disabled={hasCompletedItems}
+                        className={`border px-3 py-1 rounded-md text-sm font-medium flex items-center gap-2 cursor-pointer transition-colors ${
+                            hasCompletedItems 
+                                ? 'text-gray-400 border-gray-200 bg-gray-50 cursor-not-allowed' 
+                                : 'text-red-600 hover:text-red-700 border-red-200 hover:border-red-300'
+                        }`}
+                        title={hasCompletedItems ? "Cannot delete task with completed checklist items" : "Delete task"}
                     >
                         <Trash2 className='h-4 w-4'/>
                         Delete
@@ -295,6 +311,46 @@ const TaskUpdate = () => {
                                 </select>
                                 </div>
                             </div>
+
+                            {/* TODO Checklist */}
+                            {checklistItems && checklistItems.length > 0 && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        TODO Checklist (Read Only)
+                                    </label>
+                                    <div className="space-y-2">
+                                        {checklistItems.map((item, index) => (
+                                            <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-md">
+                                                <div 
+                                                    className={`w-4 h-4 border-2 rounded-sm flex items-center justify-center ${
+                                                        item.completed 
+                                                            ? 'bg-green-500 border-green-500' 
+                                                            : 'bg-white border-gray-300'
+                                                    }`}
+                                                >
+                                                    {item.completed && (
+                                                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+                                                <span 
+                                                    className={`text-sm flex-1 ${
+                                                        item.completed 
+                                                            ? 'text-gray-500 line-through' 
+                                                            : 'text-gray-700'
+                                                    }`}
+                                                >
+                                                    {item.text}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        {checklistItems.filter(item => item.completed).length} of {checklistItems.length} items completed
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Due Date */}
                             <div>

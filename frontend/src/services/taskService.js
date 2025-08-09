@@ -73,6 +73,24 @@ const taskService = {
         } catch (error) {
             throw error.response?.data || {message: 'Failed to fetch my tasks'}; 
         }
+    },
+
+    getMyTaskById: async (userId, taskId) => {
+        try {
+            const response = await api.get(`/tasks/my-tasks/${userId}/${taskId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to fetch task details' };
+        }
+    },
+
+    updateChecklistItem: async (taskId, itemId, itemData) => {
+        try {
+            const response = await api.put(`/tasks/${taskId}/checklist/${itemId}`, itemData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to update checklist item' };
+        }
     }
 }
 

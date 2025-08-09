@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { X, Save } from "lucide-react";
+import { X, Save, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import memberService from "../../../services/memberService";
 import LoadingSpinner from "../../common/LoadingSpinner";
@@ -21,6 +21,10 @@ const TaskCreate = () => {
         dueDate: "",
         userIds: [],
     });
+
+    const [checklistItems, setChecklistItems] = useState([
+        { id: 1, text: "", completed: false }
+    ]);
 
     useEffect(() => {
         fetchUsers();
@@ -62,6 +66,29 @@ const TaskCreate = () => {
             ? prev.userIds.filter((id) => id !== userId)
             : [...prev.userIds, userId],
         }));
+    };
+
+    // Checklist handlers
+    const addChecklistItem = () => {
+        const newId = checklistItems.length > 0 
+                    ? Math.max(...checklistItems.map(item => item.id)) + 1 
+                    : 1;
+        setChecklistItems(prev => [
+            ...prev,
+            { id: newId, text: "", completed: false }
+        ]);
+    };
+
+    const removeChecklistItem = (id) => {
+        setChecklistItems(prev => prev.filter(item => item.id !== id));
+    };
+
+    const handleChecklistChange = (id, value) => {
+        setChecklistItems(prev => 
+            prev.map(item => 
+                item.id === id ? { ...item, text: value } : item
+            )
+        );
     };
 
     const validateForm = () => {
@@ -117,13 +144,22 @@ const TaskCreate = () => {
             setLoading(true);
             setError("");
 
+            // Filter out empty checklist items and remove the id field
+            const validChecklistItems = checklistItems
+                .filter(item => item.text.trim() !== "")
+                .map(item => ({
+                    text: item.text,
+                    completed: item.completed
+                }));
+
             const taskData = {
                 ...formData,
                 userIds:
                 formData.userIds.length > 0 ? formData.userIds : [],
+                checklistItems: validChecklistItems
             };
 
-        await taskService.createTask(taskData);
+            await taskService.createTask(taskData);
             navigate("/admin/tasks");
         } catch (error) {
             console.error("Error creating task:", error);
@@ -253,6 +289,50 @@ const TaskCreate = () => {
                                     <option value="MEDIUM">Medium</option>
                                     <option value="HIGH">High</option>
                                 </select>
+                                </div>
+                            </div>
+
+                            {/* TODO Checklist */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    TODO Checklist
+                                </label>
+                                <div className="space-y-2">
+                                    {checklistItems.map((item, index) => (
+                                        <div key={item.id} className="flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                value={item.text}
+                                                onChange={(e) => handleChecklistChange(item.id, e.target.value)}
+                                                placeholder={`Checklist item ${index + 1}`}
+                                                className="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none focus:ring-indigo-500"
+                                            />
+                                            {checklistItems.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeChecklistItem(item.id)}
+                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                    title="Remove item"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    
+                                </div>
+                                <div className="flex justify-between items-center mt-1">
+                                    <p className="text-sm text-gray-500">
+                                        {checklistItems.filter(item => item.text.trim() !== "").length} checklist item(s)
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={addChecklistItem}
+                                        className="flex items-center gap-2 px-3 py-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors text-sm"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                        Add more
+                                    </button>
                                 </div>
                             </div>
 
