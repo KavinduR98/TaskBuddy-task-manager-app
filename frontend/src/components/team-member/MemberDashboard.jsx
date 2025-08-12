@@ -17,7 +17,7 @@ import {
     Tooltip,
     Legend
 } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
+import { Doughnut, Bar } from 'react-chartjs-2';
 
 // Import utility functions and chart options
 import {getTaskDistributionData, getTaskPriorityData} from '../../utils/chartDataUtils';
@@ -131,7 +131,7 @@ const MemberDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 mb-2">
                 <CardSection title="Task Distribution">
                     <div style={{ height: '300px', padding: '10px' }}>
-                        <Pie data={getTaskDistributionData(myStats)} options={pieChartOptions} />
+                        <Doughnut data={getTaskDistributionData(myStats)} options={pieChartOptions} />
                     </div>
                 </CardSection>
                 <CardSection title="Task Priority Levels">
