@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react'
 import DataTable from 'react-data-table-component'
 import memberService from '../../../services/memberService';
 import { X } from 'lucide-react';
+import LoadingSpinner from '../../common/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 const TeamMembers = () => {
 
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
     const [nameFilter, setNameFilter] = useState('');
@@ -21,11 +22,15 @@ const TeamMembers = () => {
             setUsers(userData); 
         } catch (error) {
             console.error(error);
-            setError(error.message || "Failed to load users")
+            toast.error(error.message || "Failed to load users")
         } finally {
             setLoading(false);
         }
     };
+
+    if (loading) {
+        return <LoadingSpinner />
+    }
 
     // Filter users by name
     const filteredUsers = users.filter(user =>

@@ -2,14 +2,14 @@ import { UserPlus, Mail, Lock } from 'lucide-react'
 import {Link, useNavigate} from 'react-router-dom';
 import React, { useState } from 'react'
 import loginImage from '../../assets/login-bg.jpg';
-import LoadingSpinner from '../common/LoadingSpinner';
 import authService from '../../services/authService';
+import toast from 'react-hot-toast';
 
 const Register = () => {
 
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [validationErrors, setValidationErrors] = useState({});
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -20,30 +20,65 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
         setLoading(true);
-        setError('');
 
         try {
-            const response = await authService.register(formData);
-            console.log(response);
+            await authService.register(formData);
+            toast.success('Registration successful! Please Login.');
             
-            navigate('/');
+            setTimeout(() => {
+                navigate('/');
+            }, 1000);
         } catch (error) {
-            setError(error.message || "Registration failed");
+            const errorMessage = error.message || 'Registration failed. Please try again.';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     }
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
+            ...formData,
+            [name]: value,
         });
+
+        if (validationErrors[name]) {
+            setValidationErrors((prev) => ({
+                ...prev,
+                [name]: "",
+            }));
+        }
     };
 
-    if (loading) {
-        return <LoadingSpinner />
+    const validateForm = () => {
+        const errors = {};
+        const { fullName, email, password } = formData;
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!fullName) {
+            errors.fullName = 'Full name is required';
+        }
+
+        if (!email) {
+            errors.email = 'Email is required';
+        } else if (!emailRegex.test(email)) {
+            errors.email = 'Invalid email format';
+        }
+
+        if (!password) {
+            errors.password = 'Password is required';
+        }
+
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
     }
 
   return (
@@ -63,11 +98,6 @@ const Register = () => {
 
                 {/* Form */}
                 <form className='space-y-6' onSubmit={handleSubmit}>
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
-                            {error}
-                        </div>
-                    )}
                     <div className='space-y-4'>
                         {/* Full name */}
                         <div>
@@ -84,12 +114,18 @@ const Register = () => {
                                     name='fullName'
                                     value={formData.fullName}
                                     onChange={handleChange}
-                                    required
-                                    className='appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500
-                                    text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                                    className={`appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500
+                                    text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                                        validationErrors.fullName ? "border-red-500" : "border-gray-300"
+                                    }`}
                                     placeholder='Enter your full name' 
-                                />
+                                /> 
                             </div>
+                            {validationErrors.fullName && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {validationErrors.fullName}
+                                </p>
+                            )}
                         </div>
 
                         {/* Email */}
@@ -104,16 +140,22 @@ const Register = () => {
                                 <input
                                     id="email"
                                     name="email"
-                                    type="text"
+                                    type="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    required
-                                    className="appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
-                                    placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 
-                                    focus:border-indigo-500 sm:text-sm"
+                                    className={`appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
+                                    placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500
+                                    focus:border-indigo-500 sm:text-sm ${
+                                        validationErrors.fullName ? "border-red-500" : "border-gray-300"
+                                    }`}
                                     placeholder="Enter your email"
                                 />
                             </div>
+                            {validationErrors.email && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {validationErrors.email}
+                                </p>
+                            )}
                         </div>
 
                         {/* Password */}
@@ -131,13 +173,20 @@ const Register = () => {
                                     type="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    required
-                                    className="appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
+                                    // required
+                                    className={`appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
                                     placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 
-                                    focus:border-indigo-500 sm:text-sm"
+                                    focus:border-indigo-500 sm:text-sm  ${
+                                        validationErrors.password ? "border-red-500" : "border-gray-300"
+                                    }`}
                                     placeholder="Enter your password"
                                 />
                             </div>
+                            {validationErrors.password && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {validationErrors.password}
+                                </p>
+                            )}
                         </div>
                     </div>
 

@@ -4,7 +4,7 @@ import { useNavigate, useParams  } from 'react-router-dom';
 import memberService from '../../../services/memberService';
 import taskService from '../../../services/taskService';
 import LoadingSpinner from '../../common/LoadingSpinner'
-
+import toast from 'react-hot-toast';
 
 const TaskUpdate = () => {
 
@@ -19,7 +19,6 @@ const TaskUpdate = () => {
         dueDate: '',
         userIds: []
     });
-    const [error, setError] = useState('');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
@@ -51,7 +50,7 @@ const TaskUpdate = () => {
             setChecklistItems(task.checklistItems || []);
         } catch (error) {
             console.error('Error initializing form:', error);
-            setError('Failed to load task or employee data');
+            toast.error("Failed to load task or employee data");
         } finally {
             setInitialLoading(false);
         }
@@ -129,7 +128,6 @@ const TaskUpdate = () => {
 
         try {
             setLoading(true);
-            setError('');
 
             const taskData = {
                 ...formData,
@@ -137,13 +135,18 @@ const TaskUpdate = () => {
             };
 
             await taskService.updateTask(id, taskData);
-            navigate('/admin/tasks');
+            toast.success("Task updated successfully!")
+            
+            setTimeout(() => {
+                navigate('/admin/tasks');
+            },800);
         } catch (error) {
             console.error('Error updating task:', error);
             if (error.response?.data?.validationErrors) {
                 setValidationErrors(error.response.data.validationErrors);
+                toast.error("Some fields have errors. Please check and try again.");
             } else {
-                setError(error.response?.data?.message || 'Failed to update task');
+                toast.error(error.response?.data?.message || "Failed to update task. Please try again.");
             }
         } finally {
             setLoading(false);
@@ -155,23 +158,48 @@ const TaskUpdate = () => {
     const handleDelete = async () => {
 
         if (hasCompletedItems) {
-            setError("Cannot delete task with completed checklist items.");
+            toast.error("Cannot delete task with completed checklist items.");
             return;
         }
 
-        if (window.confirm("Are you sure you want to delete this task?")) {
+        confirmDelete(async () => {
             try {
-                setLoading(true);
                 await taskService.deleteTask(id);
-                navigate("/admin/tasks");
+                toast.success("Task deleted successfully!");
+                
+                setTimeout(() => {
+                    navigate('/admin/tasks');
+                },800);
             } catch (error) {
-                console.error("Delete failed:", error);
-                setError("Failed to delete task. Please try again.");
-            } finally {
-                setLoading(false);
+                toast.error("Failed to delete task.");
             }
-        }
+        });
     }
+
+    const confirmDelete = (onConfirm) => {
+        toast((t) => (
+            <div>
+                <p>Are you sure you want to delete this task?</p>
+                <div className="flex gap-2 mt-2">
+                    <button
+                        onClick={() => {
+                            toast.dismiss(t.id);
+                            onConfirm();
+                        }}
+                        className="bg-red-500 text-white px-3 py-1 rounded"
+                    >
+                        Yes
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="bg-gray-300 px-3 py-1 rounded"
+                    >
+                        No
+                    </button>
+                </div>
+            </div>
+        ), { duration: 4000 });
+    };
 
     const handleCancel = () => {
         navigate('/admin/tasks');
@@ -203,12 +231,6 @@ const TaskUpdate = () => {
                         Delete
                     </button>
                 </div>
-
-                {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
-                    {error}
-                </div>
-                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

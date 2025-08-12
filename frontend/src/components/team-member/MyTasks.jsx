@@ -4,13 +4,13 @@ import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 import TaskCard from '../admin/task/TaskCard';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const MyTasks = () => {
 
     const navigate = useNavigate();
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
     const [tasks, setTasks] = useState([]);
     const [activeFilter, setActiveFilter] = useState('ALL');
     const [filteredTasks, setFilteredTasks] = useState([])
@@ -31,7 +31,7 @@ const MyTasks = () => {
             const data = await taskService.getMyTasks(user.id);
             setTasks(data);
         } catch (error) {
-            setError(error.message || 'Failed to fetch your tasks');
+            toast.error(error.message || 'Failed to fetch your tasks');
         } finally {
             setLoading(false);
         }
@@ -48,9 +48,7 @@ const MyTasks = () => {
     const handleCardClick = (taskId) => {
         navigate(`/member/tasks/edit/${taskId}`);
     }
-    // console.log(tasks);
     
-
     const stats = taskService.getTaskStats(tasks);
 
     const filterOptions = [
@@ -85,13 +83,6 @@ const MyTasks = () => {
                 ))}
             </div>
         </div>
-
-        {/* Error message */}
-        {error && (
-            <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md'>
-                {error}
-            </div>
-        )}
 
         {/* Tasks grid */}
         <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4'>

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import taskService from '../../services/taskService';
 import { useAuth } from '../../context/AuthContext';
 import { PRIORITY_COLORS, STATUS_COLORS } from '../../utils/constants';
+import toast from 'react-hot-toast';
 
 const ViewMemberTask = () => {
 
@@ -13,7 +14,6 @@ const ViewMemberTask = () => {
     const userId = user.id;
     const navigate = useNavigate();
 
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [task, setTask] = useState(null);
@@ -40,7 +40,7 @@ const ViewMemberTask = () => {
             );
         } catch (error) {
             console.error('Error fetching task:', error);
-            setError('Failed to load task data. You may not have access to this task.');
+            toast.error('Failed to load task data. You may not have access to this task.');
         } finally {
             setInitialLoading(false);
         }
@@ -49,8 +49,7 @@ const ViewMemberTask = () => {
     const handleChecklistToggle = async (itemId) => {
         try {
             setLoading(true);
-            setError('');
-
+            
             // Update local state optimistically
             setChecklistItems(prev =>
                 prev.map(item =>
@@ -61,14 +60,22 @@ const ViewMemberTask = () => {
             );
 
             const currentItem = checklistItems.find(item => item.id === itemId);
+            const newCompletedStatus = !currentItem.completed;
 
             const response = await taskService.updateChecklistItem(taskId, itemId, {
                 completed: !currentItem.completed
             });
 
+            if (newCompletedStatus) {
+                toast.success("Item checked!");
+            } else {
+                toast.success("Item unchecked!");
+            }
+            
+
         } catch (error) {
             console.error('Error updating checklist item:', error);
-            setError('Failed to update checklist item');
+            toast.error('Failed to update checklist item');
 
             // Revert the optimistic update
             fetchTask();
@@ -120,12 +127,6 @@ const ViewMemberTask = () => {
                         Task Details
                     </h1>
                 </div>
-
-                {error && (
-                    <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4'>
-                        {error}
-                    </div>
-                )}
 
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                     {/* Left side - Task details */}

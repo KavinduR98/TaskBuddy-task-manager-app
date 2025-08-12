@@ -3,38 +3,73 @@ import React, { useState } from "react";
 import { useNavigate, Link  } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import loginImage from '../../assets/login-bg.jpg';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({
         email: "",
         password: "",
     });
-    const [error, setError] = useState("");
+
+    const [validationErrors, setValidationErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
         setLoading(true);
-        setError("");
 
         try {
             await login(credentials);
-            navigate("/");
+            toast.success('Login successful! Redirecting...');
         } catch (error) {
-            setError(error.message || "Login failed");
+            const errorMessage = error.message || 'Login failed. Please try again.';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setCredentials({
             ...credentials,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
+
+        if (validationErrors[name]) {
+            setValidationErrors((prev) => ({
+                ...prev,
+                [name]: "",
+            }));
+        }
     };
+
+    const validateForm = () => {
+        const errors = {};
+        const { email, password } = credentials;
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email) {
+            errors.email = 'Email is required';
+        } else if (!emailRegex.test(email)) {
+            errors.email = 'Invalid email format';
+        }
+
+        if (!password) {
+            errors.password = 'Password is required';
+        }
+
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
 
     return (
         <div className="flex min-h-screen">
@@ -51,11 +86,6 @@ const Login = () => {
 
                 {/* Form */}
                 <form className="space-y-6" onSubmit={handleSubmit}>
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
-                            {error}
-                        </div>
-                    )}
                     <div className="space-y-4">
                         {/* Email */}
                         <div>
@@ -73,15 +103,21 @@ const Login = () => {
                                 id="email"
                                 name="email"
                                 type="text"
-                                required
                                 value={credentials.email}
                                 onChange={handleChange}
-                                className="appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
+                                className={`appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
                                 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 
-                                focus:border-indigo-500 sm:text-sm"
+                                focus:border-indigo-500 sm:text-sm ${
+                                        validationErrors.email ? "border-red-500" : "border-gray-300"
+                                    }`}
                                 placeholder="Enter your email"
                             />
                             </div>
+                            {validationErrors.email && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {validationErrors.email}
+                                </p>
+                            )}
                         </div>
 
                         {/* Password */}
@@ -100,15 +136,21 @@ const Login = () => {
                                 id="password"
                                 name="password"
                                 type="password"
-                                required
                                 value={credentials.password}
                                 onChange={handleChange}
-                                className="appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
+                                className={`appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 
                                 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 
-                                focus:border-indigo-500 sm:text-sm"
+                                focus:border-indigo-500 sm:text-sm ${
+                                        validationErrors.password ? "border-red-500" : "border-gray-300"
+                                    }`}
                                 placeholder="Enter your password"
                             />
                             </div>
+                            {validationErrors.password && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {validationErrors.password}
+                                </p>
+                            )}
                         </div>
                     </div>
 

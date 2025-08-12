@@ -23,6 +23,7 @@ import { Pie, Bar } from 'react-chartjs-2';
 // Import utility functions and chart options
 import {getTaskDistributionData, getTaskPriorityData} from '../../../utils/chartDataUtils';
 import {pieChartOptions, barChartOptions} from '../../../utils/chartOptions';
+import toast from "react-hot-toast";
 
 // Register Chart.js components
 ChartJS.register(
@@ -39,7 +40,6 @@ const AdminDashboard = () => {
     const [tasks, setTasks] = useState([]);
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -52,7 +52,7 @@ const AdminDashboard = () => {
             const taskData = await taskService.getAllTasks();
             setTasks(taskData);
         } catch (error) {
-            setError(error.message || "Failed to fetch tasks");
+            toast.error(error.message || "Failed to fetch tasks");
         } finally {
             setLoading(false);
         }

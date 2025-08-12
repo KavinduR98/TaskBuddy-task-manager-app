@@ -3,11 +3,11 @@ import taskService from '../../../services/taskService';
 import LoadingSpinner from '../../common/LoadingSpinner';
 import TaskCard from './TaskCard';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const TaskDashboard = () => {
 
     const navigate = useNavigate();
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [tasks, settasks] = useState([]);
     const [activeFilter, setActiveFilter] = useState('ALL');
@@ -27,7 +27,7 @@ const TaskDashboard = () => {
             const data = await taskService.getAllTasks();
             settasks(data);
         } catch (error) {
-            setError(error.message || 'failed to fetch tasks')
+            toast.error(error.message || 'failed to fetch tasks')
         } finally {
             setLoading(false);
         }
@@ -86,13 +86,6 @@ const TaskDashboard = () => {
                 </button>
             </div>
         </div>
-
-        {/* Error message */}
-        {error && (
-            <div className='bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md'>
-                {error}
-            </div>
-        )}
 
         {/* Tasks grid */}
         <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4'>

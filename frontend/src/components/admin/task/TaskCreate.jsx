@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import memberService from "../../../services/memberService";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import taskService from "../../../services/taskService";
+import toast from 'react-hot-toast';
 
 const TaskCreate = () => {
     const navigate = useNavigate();
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [userLoading, setUserLoading] = useState(true);
     const [users, setUsers] = useState([]);
@@ -37,7 +37,7 @@ const TaskCreate = () => {
             setUsers(userData);
         } catch (error) {
             console.error("Error fetching users:", error);
-            setError("Failed to load users");
+            toast.error("Failed to load users")
         } finally {
             setUserLoading(false);
         }
@@ -52,10 +52,10 @@ const TaskCreate = () => {
 
         // Clear validation error when user starts typing
         if (validationErrors[name]) {
-        setValidationErrors((prev) => ({
-            ...prev,
-            [name]: "",
-        }));
+            setValidationErrors((prev) => ({
+                ...prev,
+                [name]: "",
+            }));
         }
     };
 
@@ -142,7 +142,6 @@ const TaskCreate = () => {
 
         try {
             setLoading(true);
-            setError("");
 
             // Filter out empty checklist items and remove the id field
             const validChecklistItems = checklistItems
@@ -160,14 +159,18 @@ const TaskCreate = () => {
             };
 
             await taskService.createTask(taskData);
-            navigate("/admin/tasks");
+            toast.success("Task created successfully!")
+            
+            setTimeout(() => {
+                navigate("/admin/tasks");
+            }, 800);
         } catch (error) {
             console.error("Error creating task:", error);
-        if (error.response?.data?.validationErrors) {
-            setValidationErrors(error.response.data.validationErrors);
-        } else {
-            setError(error.response?.data?.message || "Failed to create task");
-        }
+            if (error.response?.data?.validationErrors) {
+                toast.error("Some fields have errors. Please check and try again.");
+            } else {
+                toast.error(error.response?.data?.message || "Failed to create task. Please try again.");
+            }
         } finally {
         setLoading(false);
         }
@@ -183,12 +186,6 @@ const TaskCreate = () => {
                 <h1 className="text-lg font-bold text-gray-900 mb-4">
                     Create New Task
                 </h1>
-
-                {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-4">
-                    {error}
-                </div>
-                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

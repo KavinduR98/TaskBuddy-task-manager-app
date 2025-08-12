@@ -23,6 +23,7 @@ import { Pie, Bar } from 'react-chartjs-2';
 import {getTaskDistributionData, getTaskPriorityData} from '../../utils/chartDataUtils';
 import {pieChartOptions, barChartOptions} from '../../utils/chartOptions';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 // Register Chart.js components
 ChartJS.register(
@@ -40,7 +41,6 @@ const MemberDashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
     const [tasks, setTasks] = useState([]);
 
     useEffect(() => {
@@ -55,7 +55,7 @@ const MemberDashboard = () => {
             const data = await taskService.getMyTasks(user.id);
             setTasks(data);
         } catch (error) {
-            setError(error.message || 'Failed to fetch your tasks');
+            toast.error(error.message || 'Failed to fetch your tasks');
         } finally {
             setLoading(false);
         }
