@@ -12,11 +12,13 @@ import com.ushan.backend.exception.ResourceNotFoundException;
 import com.ushan.backend.repository.ChecklistItemRepository;
 import com.ushan.backend.repository.TaskRepository;
 import com.ushan.backend.repository.UserRepository;
+import com.ushan.backend.util.TaskStatus;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -160,23 +162,45 @@ public class TaskService {
 
         log.info("TaskId: {}, ItemId: {}, New Completed Status: {}", taskId, itemId, requestDTO.getCompleted());
 
-        ChecklistItem checklistItem = checklistItemRepository.findByIdAndTaskId(itemId, taskId)
+        Task task = taskRepository.findTaskByIdWithChecklistItems(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+
+        ChecklistItem checklistItem = task.getChecklistItems().stream()
+                .filter(item -> item.getId().equals(itemId))
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("Checklist item not found with id: %d for task: %d", itemId, taskId)
                 ));
 
+        // Update checklist item completion status
         if (requestDTO.getCompleted() != null) {
             checklistItem.setCompleted(requestDTO.getCompleted());
         }
 
-        ChecklistItem updatedItem = checklistItemRepository.saveAndFlush(checklistItem);
+        // Recalculate task status
+        boolean allCompleted = task.getChecklistItems().stream().allMatch(ChecklistItem::getCompleted);
+        boolean anyCompleted = task.getChecklistItems().stream().anyMatch(ChecklistItem::getCompleted);
 
-        log.info("AFTER SAVE - Item ID: {}, Completed: {}", updatedItem.getId(), updatedItem.getCompleted());
+        if (allCompleted) {
+            task.setStatus(TaskStatus.COMPLETED);
+        } else if (anyCompleted) {
+            task.setStatus(TaskStatus.IN_PROGRESS);
+            if (task.getStartDate() == null) {
+                task.setStartDate(LocalDateTime.now());
+            }
+        } else {
+            task.setStatus(TaskStatus.PENDING);
+            task.setStartDate(null);
+        }
+
+        taskRepository.save(task);
+
+        log.info("Updated Task ID: {}, Status: {}, StartDate: {}", task.getId(), task.getStatus(), task.getStartDate());
 
         return ChecklistItemResponseDTO.builder()
-                .id(updatedItem.getId())
-                .text(updatedItem.getText())
-                .completed(updatedItem.getCompleted())
+                .id(checklistItem.getId())
+                .text(checklistItem.getText())
+                .completed(checklistItem.getCompleted())
                 .build();
     }
 

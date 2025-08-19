@@ -49,6 +49,12 @@ const ViewMemberTask = () => {
     const handleChecklistToggle = async (itemId) => {
         try {
             setLoading(true);
+
+            // Find current state of this item
+            const currentItem = checklistItems.find(item => item.id === itemId);
+            if (!currentItem) return;
+
+            const newCompletedStatus = !currentItem.completed;
             
             // Update local state optimistically
             setChecklistItems(prev =>
@@ -58,21 +64,25 @@ const ViewMemberTask = () => {
                         : item
                 )
             );
-
-            const currentItem = checklistItems.find(item => item.id === itemId);
-            const newCompletedStatus = !currentItem.completed;
-
-            const response = await taskService.updateChecklistItem(taskId, itemId, {
-                completed: !currentItem.completed
+            
+            const updatedItem  = await taskService.updateChecklistItem(taskId, itemId, {
+                completed: newCompletedStatus
             });
 
-            if (newCompletedStatus) {
-                toast.success("Item checked!");
-            } else {
-                toast.success("Item unchecked!");
-            }
-            
+            toast.success(newCompletedStatus ? "Item checked!" : "Item unchecked!");
 
+            // Fetch updated task to sync status & startDate from backend
+            const updatedTask = await taskService.getMyTaskById(userId, taskId);
+            setTask(updatedTask);
+            console.log(updatedTask);
+            
+            setChecklistItems(
+                updatedTask.checklistItems?.map((item) => ({
+                    id: item.id,
+                    text: item.text,
+                    completed: item.completed
+                })) || []
+            );
         } catch (error) {
             console.error('Error updating checklist item:', error);
             toast.error('Failed to update checklist item');
@@ -221,6 +231,18 @@ const ViewMemberTask = () => {
                                 {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'Not set'}
                             </div>
                         </div>
+
+                        {/* Due Date */}
+                        { task.startDate && ( 
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Start Date
+                                </label>
+                                <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
+                                    {task.startDate ? new Date(task.startDate).toLocaleDateString() : 'Not set'}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Right side - Assigned members */}

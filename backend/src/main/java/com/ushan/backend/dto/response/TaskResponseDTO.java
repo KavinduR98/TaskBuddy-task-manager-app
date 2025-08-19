@@ -24,6 +24,7 @@ public class TaskResponseDTO {
     private TaskStatus status;
     private TaskPriority priority;
     private LocalDate dueDate;
+    private LocalDateTime startDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Set<UserSummaryDTO> assignedUsers;
