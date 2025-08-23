@@ -125,7 +125,7 @@ const TaskDashboard = () => {
     }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 min-h-screen flex flex-col'>
         {/* Header with filters */}
         <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4'>
             <h1 className='text-2xl font-bold text-gray-800'>Manage Tasks</h1>
@@ -165,21 +165,24 @@ const TaskDashboard = () => {
         </div>
 
         {/* Tasks grid */}
-        <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-            {filteredTasks.length > 0 ? (
-                filteredTasks.map((task) => (
-                    <TaskCard 
-                        key={task.id}
-                        task={task}
-                        onClick={handleCardClick}
-                    />
-                ))
-            ) : (
-                <div className='col-span-full text-center py-12 text-gray-500'>
-                    <p>No tasks found for the selected filter.</p>
-                </div>
-            )}
+        <div className='min-h-[600px]'>
+            <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                {currentTasks.length > 0 ? (
+                    currentTasks.map((task) => (
+                        <TaskCard 
+                            key={task.id}
+                            task={task}
+                            onClick={handleCardClick}
+                        />
+                    ))
+                ) : (
+                    <div className='col-span-full text-center py-12 text-gray-500'>
+                        <p>No tasks found for the selected filter.</p>
+                    </div>
+                )}
+            </div>
         </div>
+
 
         {/* Pagination buttons */}
         {totalPages > 1 && (
