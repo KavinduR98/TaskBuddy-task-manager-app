@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, Link  } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import loginImage from '../../assets/login-bg.jpg';
+import logoImage from '../../assets/Task_Buddy-logo.png';
 import toast from 'react-hot-toast';
 
 const Login = () => {
@@ -77,11 +78,13 @@ const Login = () => {
             <div className="flex flex-col justify-center w-full lg:w-1/2 px-8 sm:px-16 bg-gray-50">
                 <div className="max-w-md w-full mx-auto space-y-8">
                 {/* Logo / App Name */}
-                <div>
-                    <h1 className="text-4xl font-extrabold text-gray-900">
-                        Task Manager
-                    </h1>
-                    <p className="mt-2 text-gray-600">Sign in to your account</p>
+                <div className="flex flex-col items-center justify-center text-center">
+                    <img 
+                        src={logoImage}
+                        alt="Task Buddy Logo" 
+                        className="h-28 w-auto"
+                    />
+                    <p className="mt-1 text-gray-600">Sign in to your account</p>
                 </div>
 
                 {/* Form */}

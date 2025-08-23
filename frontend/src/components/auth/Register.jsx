@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import loginImage from '../../assets/login-bg.jpg';
 import authService from '../../services/authService';
 import toast from 'react-hot-toast';
+import logoImage from '../../assets/Task_Buddy-logo.png';
 
 const Register = () => {
 
@@ -87,9 +88,13 @@ const Register = () => {
         <div className='flex flex-col justify-center w-full lg:w-1/2 px-8 sm:px-16 bg-gray-50'>
             <div className='max-w-md w-full mx-auto space-y-8'>
                 {/* App name / Logo */}
-                <div>
-                    <h1 className='text-4xl font-extrabold text-gray-900'>Task Manager</h1>
-                    <p className='mt-2 text-gray-600'>Create your account</p>
+                <div className="flex flex-col items-center justify-center text-center">
+                    <img 
+                        src={logoImage}
+                        alt="Task Buddy Logo" 
+                        className="h-28 w-auto"
+                    />
+                    <p className="mt-1 text-gray-600">Sign in to your account</p>
                 </div>
 
                 <div className="mb-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
