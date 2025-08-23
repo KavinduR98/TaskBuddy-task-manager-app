@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    @Query("SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.assignedUsers")
+    @Query("SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.assignedUsers ORDER BY t.createdAt DESC")
     List<Task> findAllWithUsers();
 
     @Query("SELECT DISTINCT t FROM Task t " +

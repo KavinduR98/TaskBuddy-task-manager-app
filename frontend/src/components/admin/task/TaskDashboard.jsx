@@ -13,12 +13,19 @@ const TaskDashboard = () => {
     const [activeFilter, setActiveFilter] = useState('ALL');
     const [filteredTasks, setFilteredTasks] = useState([])
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [tasksPerPage] = useState(12);
+
     useEffect(() => {
         fetchTasks();
     }, []);
 
     useEffect(() => {
         filterTasks();
+
+        // Reset to first page when filter changes
+        setCurrentPage(1);
     }, [tasks, activeFilter]);
 
     const fetchTasks = async () => {
@@ -44,6 +51,65 @@ const TaskDashboard = () => {
     const handleCardClick = (taskId) => {
         navigate(`/admin/tasks/edit/${taskId}`);
     }
+
+    // Pagination calculations
+    const totalTasks = filteredTasks.length;
+    const totalPages = Math.ceil(totalTasks / tasksPerPage);
+    const indexOfLastTask = currentPage * tasksPerPage;
+    const indexOfFirstTask = indexOfLastTask - tasksPerPage;
+    const currentTasks = filteredTasks.slice(indexOfFirstTask, indexOfLastTask);
+
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handlePageClick = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                for (let i = 1; i <= 4; i++) {
+                    pageNumbers.push(i);
+                }
+                pageNumbers.push('...');
+                pageNumbers.push(totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pageNumbers.push(1);
+                pageNumbers.push('...');
+                for (let i = totalPages - 3; i <= totalPages; i++) {
+                    pageNumbers.push(i);
+                }
+            } else {
+                pageNumbers.push(1);
+                pageNumbers.push('...');
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pageNumbers.push(i);
+                }
+                pageNumbers.push('...');
+                pageNumbers.push(totalPages);
+            }
+        }
+        
+        return pageNumbers;
+    };
 
     const stats = taskService.getTaskStats(tasks);
 
@@ -87,6 +153,17 @@ const TaskDashboard = () => {
             </div>
         </div>
 
+        <div className='flex justify-between items-center text-sm text-gray-600'>
+            <p>
+                Showing {indexOfFirstTask + 1} to {Math.min(indexOfLastTask, totalTasks)} of {totalTasks} tasks
+            </p>
+            {totalPages > 1 && (
+                <p>
+                    Page {currentPage} of {totalPages}
+                </p>
+            )}
+        </div>
+
         {/* Tasks grid */}
         <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4'>
             {filteredTasks.length > 0 ? (
@@ -103,6 +180,59 @@ const TaskDashboard = () => {
                 </div>
             )}
         </div>
+
+        {/* Pagination buttons */}
+        {totalPages > 1 && (
+            <div className='flex justify-center items-center space-x-2 mt-6'>
+                {/* Previous Button */}
+                <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        currentPage === 1 
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                    Previous
+                </button>
+
+                {/* Page Numbers */}
+                <div className='flex space-x-1'>
+                    {getPageNumbers().map((pageNum, index) => (
+                        <React.Fragment key={index}>
+                            {pageNum === '...' ? (
+                                <span className='px-3 py-2 text-sm text-gray-500'>...</span>
+                            ) : (
+                                <button
+                                    onClick={() => handlePageClick(pageNum)}
+                                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        currentPage === pageNum
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    {pageNum}
+                                </button>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+
+                {/* Next Button */}
+                <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        currentPage === totalPages 
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                    Next
+                </button>
+            </div>
+        )}
     </div>
   )
 }

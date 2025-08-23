@@ -65,7 +65,7 @@ const Sidebar = () => {
         {/* App Header */}
         <div className='mb-6 text-center'>
             <h2 className='text-2xl font-bold text-gray-800'>
-                Task Manager
+                Task Buddy
             </h2>
         </div>
 
