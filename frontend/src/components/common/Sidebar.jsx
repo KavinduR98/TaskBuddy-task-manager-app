@@ -1,7 +1,8 @@
-import { CheckSquare, Home, Users, Plus, LogOut, BarChart3, ListTodo  } from 'lucide-react';
+import { CheckSquare, Users, Plus, LogOut, BarChart3 } from 'lucide-react';
 import React from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import logoImage from '../../assets/Task_Buddy-logo.png';
 
 const Sidebar = () => {
 
@@ -63,10 +64,12 @@ const Sidebar = () => {
   return (
     <div className='bg-white shadow-sm border-r border-gray-200 w-64 min-h-screen p-4'>
         {/* App Header */}
-        <div className='mb-6 text-center'>
-            <h2 className='text-2xl font-bold text-gray-800'>
-                Task Buddy
-            </h2>
+        <div className='mb-3 text-center'>
+            <img 
+                src={logoImage}
+                alt="Task Buddy Logo" 
+                className="mx-auto h-15 w-auto"
+            />
         </div>
 
         {/* Profile Section */}
@@ -93,7 +96,7 @@ const Sidebar = () => {
                         ? 'bg-blue-100 text-blue-800' 
                         : 'bg-green-100 text-green-800'
                 }`}>
-                    {user?.role || 'USER'}
+                    {panelTitle}
                 </span>
             </div>
         </div>
